@@ -36,14 +36,50 @@ _(fill this in once decided — e.g. React Native / Flutter for frontend, Node/E
 ## Project structure
 
 ```
-mat-map/
-├── backend/      # API server — fare calc, busyness endpoints, etc.
-├── frontend/     # Client app
-├── docs/         # Feature specs, research notes, architecture decisions
-├── scripts/      # Data scraping/seeding scripts
-├── tests/        # Test suites
-├── README.md
-└── LICENSE
+Mat-Map/
+├── .github/
+│   └── workflows/
+├── apps/
+│   ├── backend/               
+│   │   ├── prisma/
+│   │   │   └── schema.prisma
+│   │   ├── src/
+│   │   │   ├── middleware/
+│   │   │   ├── routes/
+│   │   │   ├── services/
+│   │   │   └── app.js       
+│   │   ├── package.json
+│   │   └── .env
+│   ├── frontend/              
+│   │   ├── public/            
+│   │   ├── src/
+│   │   │   ├── api/
+│   │   │   ├── components/
+│   │   │   ├── hooks/
+│   │   │   ├── pages/         
+│   │   │   └── styles/
+│   │   ├── package.json
+│   │   └── next.config.js     
+│   └── ml-service/            
+│       ├── app/
+│       ├── data/
+│       ├── notebooks/
+│       └── requirements.txt
+├── infra/
+│   ├── docker-compose.yml     
+│   ├── Dockerfile.backend   
+│   ├── Dockerfile.frontend  
+│   └── Dockerfile.ml        
+├── docs/
+│   ├── api-spec.md            
+│   └── data-model.md        
+├── .env.example
+├── .gitignore                 
+├── CONTRIBUTING.md
+├── LICENSE                    
+├── ImplementationPlan.md      
+├── package.json               
+└── README.md
 ```
 
 ## Getting started
