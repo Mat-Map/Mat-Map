@@ -1,6 +1,61 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  reactStrictMode: true,
-};
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
-module.exports = nextConfig;
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Stage {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  lat       Float
+  lng       Float
+  order     Int
+  createdAt DateTime @default(now())
+
+  fromFares   Fare[]       @relation("FromStage")
+  toFares     Fare[]       @relation("ToStage")
+  routeStages RouteStage[]
+
+  @@index([order])
+}
+
+model Route {
+  id        String   @id @default(uuid())
+  name      String
+  sacco     String?
+  color     String?
+  createdAt DateTime @default(now())
+
+  routeStages RouteStage[]
+}
+
+model RouteStage {
+  id       String @id @default(uuid())
+  routeId  String
+  stageId  String
+  sequence Int
+
+  route Route @relation(fields: [routeId], references: [id], onDelete: Cascade)
+  stage Stage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+
+  @@unique([routeId, stageId])
+  @@index([routeId, sequence])
+}
+
+model Fare {
+  id          String   @id @default(uuid())
+  fromStageId String
+  toStageId   String
+  baseFare    Int
+  peakFare    Int?
+  updatedAt   DateTime @updatedAt
+
+  fromStage Stage @relation("FromStage", fields: [fromStageId], references: [id], onDelete: Cascade)
+  toStage   Stage @relation("ToStage", fields: [toStageId], references: [id], onDelete: Cascade)
+
+  @@unique([fromStageId, toStageId])
+}
