@@ -28,28 +28,32 @@ export default function MapView({
   const theme = useTheme();
   const mapRef = useRef(null);
   const [mapInstance, setMapInstance] = useState(null);
-  const [googleMaps, setGoogleMaps] = useState(null);
-  const [mapLoaded, setMapLoaded] = useState(false);
+  const [isSdkReady, setIsSdkReady] = useState(
+    () => typeof window !== 'undefined' && Boolean(window.google?.maps)
+  );
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_BROWSER_KEY;
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-
-    if (window.google && window.google.maps) {
-      setGoogleMaps(window.google.maps);
-      setMapLoaded(true);
-      return;
-    }
+    if (window.google && window.google.maps) return;
 
     if (!apiKey || apiKey.includes('<your own')) {
-      // Fallback mode without live browser key
-      setMapLoaded(false);
       return;
     }
 
     const scriptId = 'google-maps-script';
     let script = document.getElementById(scriptId);
+
+    const handleScriptLoad = () => {
+      if (window.google && window.google.maps) {
+        setIsSdkReady(true);
+      }
+    };
+
+    const handleScriptError = () => {
+      setIsSdkReady(false);
+    };
 
     if (!script) {
       script = document.createElement('script');
@@ -57,27 +61,25 @@ export default function MapView({
       script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry`;
       script.async = true;
       script.defer = true;
-
-      script.onload = () => {
-        if (window.google && window.google.maps) {
-          setGoogleMaps(window.google.maps);
-          setMapLoaded(true);
-        }
-      };
-
-      script.onerror = () => {
-        setMapLoaded(false);
-      };
-
+      script.addEventListener('load', handleScriptLoad);
+      script.addEventListener('error', handleScriptError);
       document.head.appendChild(script);
-    } else if (window.google && window.google.maps) {
-      setGoogleMaps(window.google.maps);
-      setMapLoaded(true);
+    } else {
+      script.addEventListener('load', handleScriptLoad);
+      script.addEventListener('error', handleScriptError);
     }
+
+    return () => {
+      if (script) {
+        script.removeEventListener('load', handleScriptLoad);
+        script.removeEventListener('error', handleScriptError);
+      }
+    };
   }, [apiKey]);
 
   useEffect(() => {
-    if (mapLoaded && googleMaps && mapRef.current && !mapInstance) {
+    if (isSdkReady && typeof window !== 'undefined' && window.google?.maps && mapRef.current && !mapInstance) {
+      const googleMaps = window.google.maps;
       const map = new googleMaps.Map(mapRef.current, {
         center: DEFAULT_THIKA_CENTER,
         zoom: DEFAULT_ZOOM,
@@ -91,7 +93,7 @@ export default function MapView({
       });
       setMapInstance(map);
     }
-  }, [mapLoaded, googleMaps, mapRef, mapInstance, theme]);
+  }, [isSdkReady, mapRef, mapInstance, theme]);
 
   const handleLocateMe = () => {
     if (navigator.geolocation && mapInstance) {
@@ -110,14 +112,16 @@ export default function MapView({
     }
   };
 
+  const isMapsAvailable = isSdkReady && typeof window !== 'undefined' && Boolean(window.google?.maps);
+
   return (
     <MapContainer>
       <MapOverlayBadge>
-        {mapLoaded ? 'LIVE THIKA ROAD MAP' : 'THIKA ROAD CORRIDOR MAP (DEMO)'}
+        {isMapsAvailable ? 'LIVE THIKA ROAD MAP' : 'THIKA ROAD CORRIDOR MAP (DEMO)'}
       </MapOverlayBadge>
 
       <MapCanvas ref={mapRef} id="map-canvas">
-        {!mapLoaded && (
+        {!isMapsAvailable && (
           <svg
             width="100%"
             height="100%"
@@ -163,14 +167,14 @@ export default function MapView({
       </MapCanvas>
 
       {/* Render Google Maps Polylines when SDK is loaded */}
-      {mapLoaded &&
+      {isMapsAvailable &&
         mapInstance &&
-        googleMaps &&
+        window.google?.maps &&
         routes.map((route) => (
           <RoutePolyline
             key={route.id}
             mapInstance={mapInstance}
-            googleMaps={googleMaps}
+            googleMaps={window.google.maps}
             route={route}
             isSelected={selectedRouteId === route.id}
             hasActiveSelection={Boolean(selectedRouteId)}
