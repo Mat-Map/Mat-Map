@@ -1,10 +1,16 @@
 // src/tests/journey.test.js
 // Mocks the Google Maps service so tests don't make live, billable API
 // calls or depend on network access.
+//
+// Under native ESM (--experimental-vm-modules) the classic jest.mock()
+// hoisting doesn't work — it relies on Babel/require, which don't exist
+// here. jest.unstable_mockModule + dynamic import is the ESM-correct
+// replacement.
 
+import { jest } from '@jest/globals';
 import request from 'supertest';
 
-jest.mock('../services/googleMaps.service.js', () => ({
+jest.unstable_mockModule('../services/googleMaps.service.js', () => ({
     getDirections: jest.fn().mockResolvedValue({
         durationMinutes: 42,
         distanceKm: 21.3,
