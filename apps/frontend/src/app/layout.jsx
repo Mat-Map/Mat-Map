@@ -1,5 +1,7 @@
 import StyledComponentsRegistry from './registry';
 import AppProviders from './providers';
+import PwaRegistration from '@/components/PWA/PwaRegistration';
+import OfflineBanner from '@/components/PWA/OfflineBanner';
 
 export const metadata = {
   title: 'MatMap — Nairobi Matatu Intelligence',
@@ -28,6 +30,8 @@ export default function RootLayout({ children }) {
       <body>
         <StyledComponentsRegistry>
           <AppProviders>
+            <PwaRegistration />
+            <OfflineBanner />
             {children}
           </AppProviders>
         </StyledComponentsRegistry>
