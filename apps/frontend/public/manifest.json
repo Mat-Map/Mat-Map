@@ -1,0 +1,22 @@
+{
+  "name": "MatMap - Nairobi Transit Manifest",
+  "short_name": "MatMap",
+  "description": "Real-time Nairobi matatu transit map, fare manifest, and crowd reports.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbfaef",
+  "theme_color": "#1c1c17",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

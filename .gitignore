@@ -40,3 +40,10 @@ env/
 Thumbs.db
 .vscode/
 .idea/
+
+# =========================
+# Reference Material For developers
+# =========================
+references/
+design-reference/
+
