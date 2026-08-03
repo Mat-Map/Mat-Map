@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   FormContainer,
   FieldGroup,
@@ -15,19 +15,15 @@ import {
 } from './JourneyPlannerForm.styles';
 
 export default function JourneyPlannerForm({ stages = [], onSubmit, loading }) {
-  const [fromId, setFromId] = useState('');
-  const [toId, setToId] = useState('');
+  const [selectedFromId, setSelectedFromId] = useState('');
+  const [selectedToId, setSelectedToId] = useState('');
 
-  useEffect(() => {
-    if (stages.length >= 2) {
-      if (!fromId) setFromId(stages[0].id);
-      if (!toId) setToId(stages[stages.length - 1].id);
-    }
-  }, [stages, fromId, toId]);
+  const fromId = selectedFromId || (stages.length >= 2 ? stages[0].id : '');
+  const toId = selectedToId || (stages.length >= 2 ? stages[stages.length - 1].id : '');
 
   const handleSwap = () => {
-    setFromId(toId);
-    setToId(fromId);
+    setSelectedFromId(toId);
+    setSelectedToId(fromId);
   };
 
   const handleSubmit = (e) => {
@@ -41,8 +37,8 @@ export default function JourneyPlannerForm({ stages = [], onSubmit, loading }) {
     const foundFrom = stages.find((s) => s.name?.toLowerCase().includes(fromName.toLowerCase()));
     const foundTo = stages.find((s) => s.name?.toLowerCase().includes(toName.toLowerCase()));
     if (foundFrom && foundTo) {
-      setFromId(foundFrom.id);
-      setToId(foundTo.id);
+      setSelectedFromId(foundFrom.id);
+      setSelectedToId(foundTo.id);
       if (onSubmit) onSubmit(foundFrom.id, foundTo.id);
     }
   };
@@ -54,7 +50,7 @@ export default function JourneyPlannerForm({ stages = [], onSubmit, loading }) {
         <InputSelectWrapper>
           <FieldSelect
             value={fromId}
-            onChange={(e) => setFromId(e.target.value)}
+            onChange={(e) => setSelectedFromId(e.target.value)}
             disabled={loading}
           >
             <option value="" disabled>
@@ -78,7 +74,7 @@ export default function JourneyPlannerForm({ stages = [], onSubmit, loading }) {
         <InputSelectWrapper>
           <FieldSelect
             value={toId}
-            onChange={(e) => setToId(e.target.value)}
+            onChange={(e) => setSelectedToId(e.target.value)}
             disabled={loading}
           >
             <option value="" disabled>
