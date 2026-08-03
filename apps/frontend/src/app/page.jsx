@@ -287,6 +287,9 @@ const NavItem = styled.button`
   text-transform: uppercase;
 `;
 
+import ReportFAB from '@/components/Report/ReportFAB';
+import ReportModal from '@/components/Report/ReportModal';
+
 export default function Home() {
   const { themeMode, toggleTheme } = useThemeToggle();
   const { stages } = useStages();
@@ -296,6 +299,7 @@ export default function Home() {
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [selectedStage, setSelectedStage] = useState(null);
   const [activeTab, setActiveTab] = useState('nearby');
+  const [isReportOpen, setIsReportOpen] = useState(false);
 
   const handleSelectRoute = (route) => {
     setSelectedRoute((prev) => (prev?.id === route?.id ? null : route));
@@ -401,6 +405,15 @@ export default function Home() {
           </RouteList>
         </SectionContainer>
       </MainContent>
+
+      <ReportFAB onClick={() => setIsReportOpen(true)} />
+
+      <ReportModal
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        routes={routes}
+        stages={stages}
+      />
 
       <BottomNav>
         <NavItem $active={activeTab === 'nearby'} onClick={() => setActiveTab('nearby')}>
