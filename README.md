@@ -4,7 +4,8 @@ Mat-Map is a public transport companion app for Kenyan matatu/nganya routes, bui
 
 ## Why we're building this
 
-Google Maps tells you *how* to get somewhere on public transport, but not:
+Google Maps tells you _how_ to get somewhere on public transport, but not:
+
 - How much it'll actually cost you
 - Whether traffic will blow your ETA
 - Whether the stage you're heading to is currently a crush of people
@@ -14,13 +15,13 @@ Mat-Map layers all of that on top of the routes and stages Google Maps already k
 
 ## Core features (in build order)
 
-| # | Feature | Status |
-|---|---------|--------|
-| 1 | **Base transit layer** — pull routes/stages from Google Maps Transit API | 🚧 In progress |
-| 2 | **Fare estimates** — per-route fare data (crowdsourced/manual dataset) | 📋 Planned |
-| 3 | **Traffic-compensated ETAs** — live traffic overlay like Maps' driving mode | 📋 Planned |
-| 4 | **Stage busyness** — "how busy is this stage right now," like Popular Times | 📋 Planned |
-| 5 | **Nganya vs. Quiet mode** — filter routes by vibe/temperament | 📋 Planned |
+| #   | Feature                                                                     | Status         |
+| --- | --------------------------------------------------------------------------- | -------------- |
+| 1   | **Base transit layer** — pull routes/stages from Google Maps Transit API    | 🚧 In progress |
+| 2   | **Fare estimates** — per-route fare data (crowdsourced/manual dataset)      | 📋 Planned     |
+| 3   | **Traffic-compensated ETAs** — live traffic overlay like Maps' driving mode | 📋 Planned     |
+| 4   | **Stage busyness** — "how busy is this stage right now," like Popular Times | 📋 Planned     |
+| 5   | **Nganya vs. Quiet mode** — filter routes by vibe/temperament               | 📋 Planned     |
 
 See [Issues](../../issues) and [Milestones](../../milestones) for the live breakdown of what's being worked on.
 
@@ -40,45 +41,45 @@ Mat-Map/
 ├── .github/
 │   └── workflows/
 ├── apps/
-│   ├── backend/               
+│   ├── backend/
 │   │   ├── prisma/
 │   │   │   └── schema.prisma
 │   │   ├── src/
 │   │   │   ├── middleware/
 │   │   │   ├── routes/
 │   │   │   ├── services/
-│   │   │   └── app.js       
+│   │   │   └── app.js
 │   │   ├── package.json
 │   │   └── .env
-│   ├── frontend/              
-│   │   ├── public/            
+│   ├── frontend/
+│   │   ├── public/
 │   │   ├── src/
 │   │   │   ├── api/
 │   │   │   ├── components/
 │   │   │   ├── hooks/
-│   │   │   ├── pages/         
+│   │   │   ├── pages/
 │   │   │   └── styles/
 │   │   ├── package.json
-│   │   └── next.config.js     
-│   └── ml-service/            
+│   │   └── next.config.js
+│   └── ml-service/
 │       ├── app/
 │       ├── data/
 │       ├── notebooks/
 │       └── requirements.txt
 ├── infra/
-│   ├── docker-compose.yml     
-│   ├── Dockerfile.backend   
-│   ├── Dockerfile.frontend  
-│   └── Dockerfile.ml        
+│   ├── docker-compose.yml
+│   ├── Dockerfile.backend
+│   ├── Dockerfile.frontend
+│   └── Dockerfile.ml
 ├── docs/
-│   ├── api-spec.md            
-│   └── data-model.md        
+│   ├── api-spec.md
+│   └── data-model.md
 ├── .env.example
-├── .gitignore                 
+├── .gitignore
 ├── CONTRIBUTING.md
-├── LICENSE                    
-├── ImplementationPlan.md      
-├── package.json               
+├── LICENSE
+├── ImplementationPlan.md
+├── package.json
 └── README.md
 ```
 
@@ -96,6 +97,7 @@ Mat-Map/
 New to the team or to Git collaboration? Read [`CONTRIBUTING.md`](./CONTRIBUTING.md) — it walks through our full workflow (issue → branch → PR → merge) step by step.
 
 **Quick rules:**
+
 - Don't push directly to `main` — always work on a feature branch
 - One feature/fix per branch and per PR
 - Get at least one review before merging
@@ -104,7 +106,9 @@ New to the team or to Git collaboration? Read [`CONTRIBUTING.md`](./CONTRIBUTING
 ## Team
 
 - Micah Ade Cedar — [@micah1of1](https://github.com/micah1of1)
-- _(ongezeni majina)_
+- Fabiola Mukanzi — [@fabsies](https://github.com/fabsies)
+- Britton Kinuthia — [@BrittonNK](https://github.com/BrittonNK)
+- Ashley Miser - [@ashleymiser](https://github.com/ashleymiser)
 
 ## License
 
