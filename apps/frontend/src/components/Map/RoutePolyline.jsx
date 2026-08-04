@@ -17,6 +17,7 @@ export default function RoutePolyline({
   const routeColor =
     route?.color || theme?.colors?.fallbackRouteColor || '#78776f';
 
+  // Create the polyline once, tied to this mapInstance + route's stage path
   useEffect(() => {
     if (!mapInstance || !googleMaps || !route?.stages || route.stages.length < 2) {
       return;
@@ -27,42 +28,42 @@ export default function RoutePolyline({
       lng: Number(stage.lng),
     }));
 
+    const polyline = new googleMaps.Polyline({
+      path: pathCoordinates,
+      geodesic: true,
+      strokeColor: routeColor,
+      map: mapInstance,
+    });
+
+    const clickListener = polyline.addListener('click', () => {
+      if (onSelectRoute) onSelectRoute(route);
+    });
+
+    polylineRef.current = polyline;
+
+    // Cleanup: remove listener + polyline on unmount or when route/map changes
+    return () => {
+      googleMaps.event.removeListener(clickListener);
+      polyline.setMap(null);
+      polylineRef.current = null;
+    };
+  }, [mapInstance, googleMaps, route, routeColor, onSelectRoute]);
+
+  // Update styling when selection state changes, without recreating the polyline
+  useEffect(() => {
+    if (!polylineRef.current) return;
+
     const opacity = hasActiveSelection ? (isSelected ? 1.0 : 0.35) : 0.85;
     const strokeWidth = isSelected ? 6 : 4;
     const zIndex = isSelected ? 10 : 2;
 
-    if (!polylineRef.current) {
-      const polyline = new googleMaps.Polyline({
-        path: pathCoordinates,
-        geodesic: true,
-        strokeColor: routeColor,
-        strokeOpacity: opacity,
-        strokeWeight: strokeWidth,
-        zIndex,
-        map: mapInstance,
-      });
-
-      polyline.addListener('click', () => {
-        if (onSelectRoute) onSelectRoute(route);
-      });
-
-      polylineRef.current = polyline;
-    } else {
-      polylineRef.current.setOptions({
-        strokeColor: routeColor,
-        strokeOpacity: opacity,
-        strokeWeight: strokeWidth,
-        zIndex,
-      });
-    }
-
-    return () => {
-      if (polylineRef.current) {
-        polylineRef.current.setMap(null);
-        polylineRef.current = null;
-      }
-    };
-  }, [mapInstance, googleMaps, route, isSelected, hasActiveSelection, routeColor, onSelectRoute]);
+    polylineRef.current.setOptions({
+      strokeColor: routeColor,
+      strokeOpacity: opacity,
+      strokeWeight: strokeWidth,
+      zIndex,
+    });
+  }, [isSelected, hasActiveSelection, routeColor]);
 
   return null;
 }
