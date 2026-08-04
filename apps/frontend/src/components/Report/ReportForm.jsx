@@ -6,9 +6,17 @@ import {
   FieldGroup,
   FieldLabel,
   FieldSelect,
-  OptionButton,
-  OptionTitle,
-  OptionSub,
+  ChipsRow,
+  FareChipButton,
+  CustomFareInput,
+  SegmentedCrowdContainer,
+  CrowdIndicatorBg,
+  CrowdSegmentButton,
+  CrowdDot,
+  VibeCardsRow,
+  VibeRadioCard,
+  VibeIcon,
+  VibeCardLabel,
   SubmitButton,
 } from './ReportForm.styles';
 
@@ -16,16 +24,29 @@ export default function ReportForm({ routes = [], stages = [], onSubmit, submitt
   const [selectedRouteId, setSelectedRouteId] = useState('');
   const [selectedStageId, setSelectedStageId] = useState('');
   const [fareCategory, setFareCategory] = useState('80');
-  const [crowdLevel, setCrowdLevel] = useState('sitting_on_sema');
-  const [vibe, setVibe] = useState('nganya');
+  const [customFare, setCustomFare] = useState('');
+  const [crowdLevel, setCrowdLevel] = useState('sitting_on_sema'); // 'low', 'sitting_on_sema' (med), 'high'
+  const [vibe, setVibe] = useState('nganya'); // 'nganya' or 'quiet'
+
+  const crowdOptions = [
+    { key: 'low', label: 'Low', color: '#7DA82E' },
+    { key: 'sitting_on_sema', label: 'Med', color: '#E8722C' },
+    { key: 'high', label: 'High', color: '#BA1A1A' },
+  ];
+
+  const currentCrowdIndex = Math.max(
+    0,
+    crowdOptions.findIndex((opt) => opt.key === crowdLevel)
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const finalFare = customFare ? Number(customFare) : Number(fareCategory) || 80;
     if (onSubmit) {
       onSubmit({
         routeId: selectedRouteId || (routes[0]?.id || 'r1'),
         stageId: selectedStageId || (stages[0]?.id || 's1'),
-        fareReported: Number(fareCategory) || 80,
+        fareReported: finalFare,
         crowdLevel,
         vibe,
       });
@@ -33,12 +54,13 @@ export default function ReportForm({ routes = [], stages = [], onSubmit, submitt
   };
 
   return (
-    <FormContainer onSubmit={handleSubmit}>
+    <FormContainer onSubmit={handleSubmit} data-testid="report-form">
       <FieldGroup>
-        <FieldLabel>CORRIDOR ROUTE</FieldLabel>
+        <FieldLabel>Corridor Route</FieldLabel>
         <FieldSelect
           value={selectedRouteId}
           onChange={(e) => setSelectedRouteId(e.target.value)}
+          data-testid="report-route-select"
         >
           {routes.map((rt) => (
             <option key={rt.id} value={rt.id}>
@@ -50,10 +72,11 @@ export default function ReportForm({ routes = [], stages = [], onSubmit, submitt
       </FieldGroup>
 
       <FieldGroup>
-        <FieldLabel>CURRENT STAGE LOCATION</FieldLabel>
+        <FieldLabel>Current Stage Location</FieldLabel>
         <FieldSelect
           value={selectedStageId}
           onChange={(e) => setSelectedStageId(e.target.value)}
+          data-testid="report-stage-select"
         >
           {stages.map((st) => (
             <option key={st.id} value={st.id}>
@@ -65,52 +88,73 @@ export default function ReportForm({ routes = [], stages = [], onSubmit, submitt
       </FieldGroup>
 
       <FieldGroup>
-        <FieldLabel>FARE PAID REPORT</FieldLabel>
-        <OptionButton
-          $color="#fcc019"
-          $active={fareCategory === '80'}
-          onClick={() => setFareCategory('80')}
-        >
-          <div>
-            <OptionSub>FARE INFO</OptionSub>
-            <OptionTitle>FARE PAID: KES 80 (STANDARD)</OptionTitle>
-          </div>
-          <span>💳</span>
-        </OptionButton>
+        <FieldLabel>Fare Paid</FieldLabel>
+        <ChipsRow data-testid="fare-chips-row">
+          {['50', '80', '100', '120'].map((amount) => (
+            <FareChipButton
+              key={amount}
+              $active={fareCategory === amount && !customFare}
+              onClick={() => {
+                setFareCategory(amount);
+                setCustomFare('');
+              }}
+              data-testid={`fare-chip-${amount}`}
+            >
+              Ksh {amount}
+            </FareChipButton>
+          ))}
+        </ChipsRow>
+        <CustomFareInput
+          type="number"
+          placeholder="Other amount (Ksh)"
+          value={customFare}
+          onChange={(e) => setCustomFare(e.target.value)}
+          data-testid="custom-fare-input"
+        />
       </FieldGroup>
 
       <FieldGroup>
-        <FieldLabel>CAPACITY & CROWD STATUS</FieldLabel>
-        <OptionButton
-          $color="#ba1a1a"
-          $active={crowdLevel === 'sitting_on_sema'}
-          onClick={() => setCrowdLevel('sitting_on_sema')}
-        >
-          <div>
-            <OptionSub>CAPACITY</OptionSub>
-            <OptionTitle>SITTING ON SEMA (CROWDED)</OptionTitle>
-          </div>
-          <span>👥</span>
-        </OptionButton>
+        <FieldLabel>Stage Crowd</FieldLabel>
+        <SegmentedCrowdContainer data-testid="crowd-segmented-control">
+          <CrowdIndicatorBg $index={currentCrowdIndex} />
+          {crowdOptions.map((opt) => (
+            <CrowdSegmentButton
+              key={opt.key}
+              $selected={crowdLevel === opt.key}
+              onClick={() => setCrowdLevel(opt.key)}
+              data-testid={`crowd-option-${opt.key}`}
+            >
+              <CrowdDot $color={opt.color} />
+              {opt.label}
+            </CrowdSegmentButton>
+          ))}
+        </SegmentedCrowdContainer>
       </FieldGroup>
 
       <FieldGroup>
-        <FieldLabel>ATMOSPHERE & VIBE</FieldLabel>
-        <OptionButton
-          $color="#785900"
-          $active={vibe === 'nganya'}
-          onClick={() => setVibe('nganya')}
-        >
-          <div>
-            <OptionSub>ATMOSPHERE</OptionSub>
-            <OptionTitle>VIBE: NGANYA (LOUD BASS)</OptionTitle>
-          </div>
-          <span>🔊</span>
-        </OptionButton>
+        <FieldLabel>Vehicle Vibe</FieldLabel>
+        <VibeCardsRow data-testid="vibe-cards-row">
+          <VibeRadioCard
+            $active={vibe === 'nganya'}
+            onClick={() => setVibe('nganya')}
+            data-testid="vibe-card-nganya"
+          >
+            <VibeIcon>🔊</VibeIcon>
+            <VibeCardLabel>Nganya</VibeCardLabel>
+          </VibeRadioCard>
+          <VibeRadioCard
+            $active={vibe === 'quiet'}
+            onClick={() => setVibe('quiet')}
+            data-testid="vibe-card-quiet"
+          >
+            <VibeIcon>🔇</VibeIcon>
+            <VibeCardLabel>Quiet</VibeCardLabel>
+          </VibeRadioCard>
+        </VibeCardsRow>
       </FieldGroup>
 
-      <SubmitButton disabled={submitting}>
-        {submitting ? 'SUBMITTING...' : 'SUBMIT COMMUNITY REPORT ➔'}
+      <SubmitButton disabled={submitting} data-testid="report-submit-btn">
+        {submitting ? 'Submitting...' : 'Submit Report 🚀'}
       </SubmitButton>
     </FormContainer>
   );
