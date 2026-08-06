@@ -182,6 +182,21 @@ export default function MapView({
           />
         ))}
 
+       {/* Render Google Maps Stage Markers when SDK is loaded */}
+      {isMapsAvailable &&
+        mapInstance &&
+        window.google?.maps &&
+        stages.map((stage) => (
+          <StageMarker
+            key={stage.id}
+            mapInstance={mapInstance}
+            googleMaps={window.google.maps}
+            stage={stage}
+            isSelected={selectedStageId === stage.id}
+            onSelectStage={onSelectStage}
+          />
+        ))}  
+
       {/* Pulsing Live Vehicle Indicators */}
       <VehiclePulse style={{ top: '35%', left: '30%' }} onClick={() => onSelectRoute(routes[0])}>
         <VehicleBadge $color={routes[0]?.color || '#1D9E75'}>237</VehicleBadge>

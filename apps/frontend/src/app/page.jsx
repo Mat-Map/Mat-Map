@@ -6,38 +6,56 @@ import { useThemeToggle } from './providers';
 import { useStages } from '@/hooks/useStages';
 import { useRoutes } from '@/hooks/useRoutes';
 import MapView from '@/components/Map/MapView';
+import JourneyForm from '@/components/JourneyForm';
+import ReportFAB from '@/components/Report/ReportFAB';
+import ReportModal from '@/components/Report/ReportModal';
 
 const PageContainer = styled.main`
-  min-height: 100vh;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
   background-color: ${({ theme }) => theme.colors.background};
   color: ${({ theme }) => theme.colors.onBackground};
-  padding-bottom: 80px;
+  user-select: none;
 `;
 
-const TopAppBar = styled.header`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 64px;
-  z-index: 50;
+const MapBackgroundWrapper = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: ${({ theme }) => theme.zIndex?.map || 0};
+`;
+
+const TopFloatingControls = styled.header`
+  position: absolute;
+  top: ${({ theme }) => theme.spacing.floatingOffset || '16px'};
+  left: ${({ theme }) => theme.spacing.containerMargin || '16px'};
+  right: ${({ theme }) => theme.spacing.containerMargin || '16px'};
+  z-index: ${({ theme }) => theme.zIndex?.floatingControls || 40};
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  pointer-events: none;
+`;
+
+const HeaderBarPill = styled.div`
+  pointer-events: auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 ${({ theme }) => theme.spacing.md};
-  background-color: ${({ theme }) => theme.colors.inkBlack};
-  border-bottom: 4px solid ${({ theme }) => theme.colors.matatuYellow};
-`;
-
-const BrandSection = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.md};
+  background-color: ${({ theme }) =>
+    theme.mode === 'dark' ? 'rgba(20, 20, 15, 0.9)' : 'rgba(255, 255, 255, 0.95)'};
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid ${({ theme }) => theme.colors.outlineVariant};
+  border-radius: 9999px;
+  padding: 6px 16px;
+  box-shadow: ${({ theme }) => theme.shadows.ambient};
 `;
 
 const BrandTitle = styled.h1`
   font-family: ${({ theme }) => theme.typography.fonts.display};
-  font-size: 28px;
+  font-size: 22px;
   color: ${({ theme }) => theme.colors.matatuYellow};
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -50,57 +68,75 @@ const ThemeToggleButton = styled.button`
   font-family: ${({ theme }) => theme.typography.fonts.mono};
   font-size: 11px;
   font-weight: 700;
-  padding: 4px 8px;
-  border: 2px solid ${({ theme }) => theme.colors.inkBlack};
+  padding: 4px 10px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
   text-transform: uppercase;
+  transition: transform 0.15s ease;
+
+  &:active {
+    transform: scale(0.94);
+  }
 `;
 
-const MainContent = styled.div`
-  padding-top: 64px;
+const BottomSheetContainer = styled.div`
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: ${({ theme }) => theme.zIndex?.bottomSheet || 30};
+  background-color: ${({ theme }) =>
+    theme.mode === 'dark' ? theme.colors.surface : theme.colors.surfaceContainerLowest};
+  border-top-left-radius: 32px;
+  border-top-right-radius: 32px;
+  box-shadow: ${({ theme }) => theme.shadows.bottomSheet};
+  padding: 12px 16px 84px 16px;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: ${({ $isExpanded }) => ($isExpanded ? 'translateY(0)' : 'translateY(calc(100% - 130px))')};
+  max-height: 75vh;
+  display: flex;
+  flex-direction: column;
 `;
 
-const SearchContainer = styled.div`
-  padding: ${({ theme }) => theme.spacing.md};
-  background-color: ${({ theme }) => theme.colors.surfaceVariant};
-  border-bottom: ${({ theme }) => theme.borders.card};
+const GrabberHandle = styled.div`
+  width: 48px;
+  height: 6px;
+  background-color: ${({ theme }) => theme.colors.outlineVariant};
+  border-radius: 9999px;
+  margin: 4px auto 12px auto;
+  cursor: pointer;
+  flex-shrink: 0;
 `;
 
-const SearchInputWrapper = styled.div`
-  position: relative;
+const SheetHeader = styled.div`
   display: flex;
   align-items: center;
-  margin-bottom: ${({ theme }) => theme.spacing.md};
+  justify-content: space-between;
+  margin-bottom: 12px;
 `;
 
-const SearchIcon = styled.span`
-  position: absolute;
-  left: ${({ theme }) => theme.spacing.md};
-  color: ${({ theme }) => theme.colors.onSurfaceVariant};
-  font-family: ${({ theme }) => theme.typography.fonts.mono};
-  font-size: 14px;
-  font-weight: 700;
-`;
-
-const SearchInput = styled.input`
-  width: 100%;
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.md} 48px;
-  background-color: ${({ theme }) => theme.colors.surface};
-  border: ${({ theme }) => theme.borders.card};
+const SheetTitle = styled.h2`
   font-family: ${({ theme }) => theme.typography.fonts.body};
-  font-size: 16px;
+  font-size: 20px;
+  font-weight: 700;
   color: ${({ theme }) => theme.colors.onSurface};
+  margin: 0;
+`;
 
-  &:focus {
-    background-color: ${({ theme }) => theme.colors.matatuYellow};
-    color: ${({ theme }) => theme.colors.inkBlack};
-  }
+const SheetSubtitle = styled.p`
+  font-family: ${({ theme }) => theme.typography.fonts.body};
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.onSurfaceVariant};
+  margin: 2px 0 0 0;
 `;
 
 const FilterChipsRow = styled.div`
   display: flex;
-  gap: ${({ theme }) => theme.spacing.sm};
+  gap: 8px;
   overflow-x: auto;
-  padding-bottom: ${({ theme }) => theme.spacing.xs};
+  padding-bottom: 8px;
+  margin-bottom: 12px;
 
   &::-webkit-scrollbar {
     display: none;
@@ -109,237 +145,189 @@ const FilterChipsRow = styled.div`
 
 const FilterChip = styled.button`
   flex-shrink: 0;
-  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
+  padding: 6px 14px;
+  border-radius: 9999px;
   background-color: ${({ $active, theme }) =>
-    $active ? theme.colors.inkBlack : theme.colors.surface};
+    $active ? theme.colors.matatuYellow : theme.colors.surfaceContainerHigh};
   color: ${({ $active, theme }) =>
-    $active ? theme.colors.matatuYellow : theme.colors.onSurface};
-  border: ${({ theme }) => theme.borders.card};
+    $active ? theme.colors.inkBlack : theme.colors.onSurface};
+  border: 1px solid ${({ theme }) => theme.colors.outlineVariant};
   font-family: ${({ theme }) => theme.typography.fonts.body};
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s ease;
 `;
 
-const SectionContainer = styled.section`
-  padding: ${({ theme }) => theme.spacing.md};
-`;
-
-const SectionHeader = styled.div`
+const RouteCardsScrollList = styled.div`
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
-`;
-
-const SectionTitle = styled.h2`
-  font-family: ${({ theme }) => theme.typography.fonts.display};
-  font-size: 24px;
-  color: ${({ theme }) => theme.colors.onBackground};
-  text-transform: uppercase;
-  margin: 0;
-`;
-
-const SectionMeta = styled.span`
-  font-family: ${({ theme }) => theme.typography.fonts.mono};
-  font-size: 12px;
-  color: ${({ theme }) => theme.colors.onSurfaceVariant};
-`;
-
-const LiveCarousel = styled.div`
-  display: flex;
-  gap: ${({ theme }) => theme.spacing.md};
-  overflow-x: auto;
-  padding-bottom: ${({ theme }) => theme.spacing.md};
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  padding-bottom: 24px;
+  max-height: 50vh;
 
   &::-webkit-scrollbar {
     display: none;
   }
 `;
 
-const LiveCard = styled.div`
-  flex-shrink: 0;
-  width: 260px;
-  background-color: ${({ theme }) => theme.colors.surface};
-  border: ${({ theme }) => theme.borders.card};
-  border-left: ${({ theme }) => theme.spacing.liveryStripe} solid ${({ $color }) => $color || '#1D9E75'};
-  padding: ${({ theme }) => theme.spacing.md};
-  box-shadow: ${({ $selected, theme }) => ($selected ? theme.colors.glow : 'none')};
-  cursor: pointer;
-`;
-
-const CardTopRow = styled.div`
+const CardRow = styled.div`
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: ${({ theme }) => theme.spacing.sm};
+  background-color: ${({ $selected, theme }) =>
+    $selected ? theme.colors.surfaceContainerHigh : theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.outlineVariant};
+  border-radius: 24px;
+  padding: 14px 16px;
+  box-shadow: ${({ theme }) => theme.shadows.ambient};
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:active {
+    transform: scale(0.98);
+  }
 `;
 
-const RouteBadge = styled.div`
-  background-color: ${({ $color }) => $color || '#1D9E75'};
-  color: #ffffff;
+const CardLeft = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 14px;
+`;
+
+const RouteAvatarBadge = styled.div`
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: ${({ $color, theme }) => $color || theme.colors.matatuYellow};
+  color: ${({ theme }) => theme.colors.inkBlack};
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-family: ${({ theme }) => theme.typography.fonts.display};
-  font-size: 20px;
-  padding: 4px 8px;
-  border: 1px solid ${({ theme }) => theme.colors.inkBlack};
-`;
-
-const EtaBox = styled.div`
-  text-align: right;
-`;
-
-const EtaVal = styled.div`
-  font-family: ${({ theme }) => theme.typography.fonts.mono};
   font-size: 18px;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.onSurface};
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
 `;
 
-const EtaLbl = styled.div`
-  font-family: ${({ theme }) => theme.typography.fonts.mono};
-  font-size: 11px;
-  color: ${({ theme }) => theme.colors.onSurfaceVariant};
+const RouteMeta = styled.div`
+  display: flex;
+  flex-direction: column;
 `;
 
-const RouteName = styled.h3`
+const RouteTitle = styled.h3`
   font-family: ${({ theme }) => theme.typography.fonts.body};
   font-size: 16px;
   font-weight: 700;
-  margin-bottom: ${({ theme }) => theme.spacing.xs};
+  color: ${({ theme }) => theme.colors.onSurface};
+  margin: 0 0 2px 0;
 `;
 
-const SaccoText = styled.p`
-  font-family: ${({ theme }) => theme.typography.fonts.mono};
+const SaccoText = styled.span`
+  font-family: ${({ theme }) => theme.typography.fonts.body};
   font-size: 13px;
   color: ${({ theme }) => theme.colors.onSurfaceVariant};
 `;
 
-const RouteList = styled.div`
+const CardRight = styled.div`
   display: flex;
   flex-direction: column;
-  border-top: ${({ theme }) => theme.borders.divider};
+  align-items: flex-end;
+  gap: 4px;
 `;
 
-const RouteListItem = styled.div`
+const EtaBadge = styled.div`
+  font-family: ${({ theme }) => theme.typography.fonts.body};
+  font-size: 16px;
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.onSurface};
+`;
+
+const CrowdIndicatorRow = styled.div`
+  display: flex;
+  gap: 4px;
+`;
+
+const CrowdDot = styled.div`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: ${({ $color }) => $color};
+`;
+
+const FloatingDockNav = styled.nav`
+  position: absolute;
+  bottom: ${({ theme }) => theme.spacing.floatingOffset || '20px'};
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: ${({ theme }) => theme.zIndex?.floatingDock || 50};
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: ${({ theme }) => theme.spacing.md} ${({ theme }) => theme.spacing.sm};
-  border-bottom: ${({ theme }) => theme.borders.divider};
-  background-color: ${({ $selected, theme }) =>
-    $selected ? theme.colors.surfaceVariant : theme.colors.surface};
-  cursor: pointer;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.colors.surfaceVariant};
-  }
+  gap: 8px;
+  background-color: ${({ theme }) =>
+    theme.mode === 'dark' ? 'rgba(28, 28, 23, 0.95)' : 'rgba(255, 255, 255, 0.95)'};
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid ${({ theme }) => theme.colors.outlineVariant};
+  border-radius: 9999px;
+  padding: 6px 12px;
+  box-shadow: ${({ theme }) => theme.shadows.floatingDock};
 `;
 
-const ListItemLeft = styled.div`
+const DockNavItem = styled.button`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.md};
-`;
-
-const ListRouteBox = styled.div`
-  width: 60px;
+  justify-content: center;
+  width: 44px;
   height: 44px;
-  background-color: ${({ $color }) => $color || '#14140F'};
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: ${({ theme }) => theme.typography.fonts.display};
-  font-size: 20px;
-  border: 1px solid ${({ theme }) => theme.colors.inkBlack};
-`;
-
-const BottomNav = styled.nav`
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 64px;
-  z-index: 50;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background-color: ${({ theme }) => theme.colors.surface};
-  border-top: ${({ theme }) => theme.borders.card};
-`;
-
-const NavItem = styled.button`
-  flex: 1;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  border-radius: 50%;
+  border: none;
   background-color: ${({ $active, theme }) =>
     $active ? theme.colors.matatuYellow : 'transparent'};
   color: ${({ $active, theme }) =>
     $active ? theme.colors.inkBlack : theme.colors.onSurfaceVariant};
-  font-family: ${({ theme }) => theme.typography.fonts.body};
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-`;
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease;
 
-import ReportFAB from '@/components/Report/ReportFAB';
-import ReportModal from '@/components/Report/ReportModal';
+  &:active {
+    transform: scale(0.9);
+  }
+`;
 
 export default function Home() {
   const { themeMode, toggleTheme } = useThemeToggle();
   const { stages } = useStages();
   const { routes } = useRoutes();
 
+  const [origin, setOrigin] = useState('Nairobi CBD');
+  const [destination, setDestination] = useState('');
+  const [vibeFilter, setVibeFilter] = useState('nganya');
   const [activeFilter, setActiveFilter] = useState('All routes');
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [selectedStage, setSelectedStage] = useState(null);
   const [activeTab, setActiveTab] = useState('nearby');
   const [isReportOpen, setIsReportOpen] = useState(false);
+  const [isSheetExpanded, setIsSheetExpanded] = useState(false);
 
   const handleSelectRoute = (route) => {
     setSelectedRoute((prev) => (prev?.id === route?.id ? null : route));
+    setIsSheetExpanded(true);
   };
 
   const handleSelectStage = (stage) => {
     setSelectedStage((prev) => (prev?.id === stage?.id ? null : stage));
   };
 
+  const handleSearchSubmit = (searchParams) => {
+    setIsSheetExpanded(true);
+  };
+
   return (
     <PageContainer>
-      <TopAppBar>
-        <BrandSection>
-          <BrandTitle>MATMAP</BrandTitle>
-        </BrandSection>
-        <ThemeToggleButton onClick={toggleTheme}>
-          {themeMode.toUpperCase()} MODE
-        </ThemeToggleButton>
-      </TopAppBar>
-
-      <MainContent>
-        <SearchContainer>
-          <SearchInputWrapper>
-            <SearchIcon>🔍</SearchIcon>
-            <SearchInput placeholder="Where are you headed? (e.g. Kasarani, Juja)" />
-          </SearchInputWrapper>
-
-          <FilterChipsRow>
-            {['All routes', 'Live now', 'Saved', 'Thika Rd'].map((chip) => (
-              <FilterChip
-                key={chip}
-                $active={activeFilter === chip}
-                onClick={() => setActiveFilter(chip)}
-              >
-                {chip}
-              </FilterChip>
-            ))}
-          </FilterChipsRow>
-        </SearchContainer>
-
+      <MapBackgroundWrapper>
         <MapView
           stages={stages}
           routes={routes}
@@ -348,63 +336,78 @@ export default function Home() {
           onSelectRoute={handleSelectRoute}
           onSelectStage={handleSelectStage}
         />
+      </MapBackgroundWrapper>
 
-        <SectionContainer>
-          <SectionHeader>
-            <SectionTitle>Live Now</SectionTitle>
-            <SectionMeta>{routes.length || 3} Corridor Routes Active</SectionMeta>
-          </SectionHeader>
+      <TopFloatingControls>
+        <HeaderBarPill>
+          <BrandTitle>MATMAP</BrandTitle>
+          <ThemeToggleButton onClick={toggleTheme} data-testid="theme-toggle-btn">
+            {themeMode.toUpperCase()} MODE
+          </ThemeToggleButton>
+        </HeaderBarPill>
 
-          <LiveCarousel>
-            {routes.map((route, idx) => (
-              <LiveCard
-                key={route.id || idx}
-                $color={route.color}
-                $selected={selectedRoute?.id === route.id}
-                onClick={() => handleSelectRoute(route)}
-              >
-                <CardTopRow>
-                  <RouteBadge $color={route.color}>
-                    {route.name?.split(' ')[1] || route.name || '237'}
-                  </RouteBadge>
-                  <EtaBox>
-                    <EtaVal>{(idx + 1) * 4} min</EtaVal>
-                    <EtaLbl>ETA</EtaLbl>
-                  </EtaBox>
-                </CardTopRow>
-                <RouteName>{route.name}</RouteName>
-                <SaccoText>🚌 {route.sacco || 'Thika Rd SACCO'}</SaccoText>
-              </LiveCard>
-            ))}
-          </LiveCarousel>
-        </SectionContainer>
+        <JourneyForm
+          origin={origin}
+          destination={destination}
+          onOriginChange={setOrigin}
+          onDestinationChange={setDestination}
+          vibe={vibeFilter}
+          onVibeChange={setVibeFilter}
+          onSubmit={handleSearchSubmit}
+        />
+      </TopFloatingControls>
 
-        <SectionContainer>
-          <SectionTitle style={{ marginBottom: '12px' }}>Nearby Routes</SectionTitle>
-          <RouteList>
-            {routes.map((route) => (
-              <RouteListItem
-                key={route.id}
-                $selected={selectedRoute?.id === route.id}
-                onClick={() => handleSelectRoute(route)}
-              >
-                <ListItemLeft>
-                  <ListRouteBox $color={route.color}>
-                    {route.name?.split(' ')[1] || route.name?.slice(0, 3)}
-                  </ListRouteBox>
-                  <div>
-                    <RouteName style={{ marginBottom: 0 }}>{route.name}</RouteName>
-                    <SaccoText>{route.sacco || 'Corridor Matatu'}</SaccoText>
-                  </div>
-                </ListItemLeft>
-                <FilterChip $active={selectedRoute?.id === route.id}>
-                  {selectedRoute?.id === route.id ? 'SELECTED' : 'VIEW'}
-                </FilterChip>
-              </RouteListItem>
-            ))}
-          </RouteList>
-        </SectionContainer>
-      </MainContent>
+      <BottomSheetContainer $isExpanded={isSheetExpanded} id="bottom-sheet">
+        <GrabberHandle onClick={() => setIsSheetExpanded((prev) => !prev)} />
+        <SheetHeader>
+          <div>
+            <SheetTitle>{routes.length || 3} Routes Nearby</SheetTitle>
+            <SheetSubtitle>Swipe up to view details and live status</SheetSubtitle>
+          </div>
+        </SheetHeader>
+
+        <FilterChipsRow>
+          {['All routes', 'Live now', 'Saved', 'Thika Rd'].map((chip) => (
+            <FilterChip
+              key={chip}
+              $active={activeFilter === chip}
+              onClick={() => setActiveFilter(chip)}
+            >
+              {chip}
+            </FilterChip>
+          ))}
+        </FilterChipsRow>
+
+        <RouteCardsScrollList>
+          {routes.map((route, idx) => (
+            <CardRow
+              key={route.id || idx}
+              $selected={selectedRoute?.id === route.id}
+              onClick={() => handleSelectRoute(route)}
+              data-testid={`route-card-${route.id || idx}`}
+            >
+              <CardLeft>
+                <RouteAvatarBadge $color={route.color}>
+                  {route.name?.split(' ')[1] || route.name?.slice(0, 3) || '237'}
+                </RouteAvatarBadge>
+                <RouteMeta>
+                  <RouteTitle>{route.name}</RouteTitle>
+                  <SaccoText>🚌 {route.sacco || 'Corridor Matatu'}</SaccoText>
+                </RouteMeta>
+              </CardLeft>
+
+              <CardRight>
+                <EtaBadge>{(idx + 1) * 4} min</EtaBadge>
+                <CrowdIndicatorRow>
+                  <CrowdDot $color="#7DA82E" />
+                  <CrowdDot $color="#E8722C" />
+                  <CrowdDot $color="#BA1A1A" />
+                </CrowdIndicatorRow>
+              </CardRight>
+            </CardRow>
+          ))}
+        </RouteCardsScrollList>
+      </BottomSheetContainer>
 
       <ReportFAB onClick={() => setIsReportOpen(true)} />
 
@@ -415,20 +418,43 @@ export default function Home() {
         stages={stages}
       />
 
-      <BottomNav>
-        <NavItem $active={activeTab === 'nearby'} onClick={() => setActiveTab('nearby')}>
-          🚌 Nearby
-        </NavItem>
-        <NavItem $active={activeTab === 'saved'} onClick={() => setActiveTab('saved')}>
-          🔖 Saved
-        </NavItem>
-        <NavItem $active={activeTab === 'alerts'} onClick={() => setActiveTab('alerts')}>
-          ⚠️ Alerts
-        </NavItem>
-        <NavItem $active={activeTab === 'settings'} onClick={() => setActiveTab('settings')}>
-          ⚙️ Settings
-        </NavItem>
-      </BottomNav>
+      <FloatingDockNav data-testid="bottom-icon-dock">
+        <DockNavItem
+          $active={activeTab === 'nearby'}
+          onClick={() => {
+            setActiveTab('nearby');
+            setIsSheetExpanded((prev) => !prev);
+          }}
+          title="Nearby Routes"
+          data-testid="dock-nav-nearby"
+        >
+          🔍
+        </DockNavItem>
+        <DockNavItem
+          $active={activeTab === 'saved'}
+          onClick={() => setActiveTab('saved')}
+          title="Saved Routes"
+          data-testid="dock-nav-saved"
+        >
+          🔖
+        </DockNavItem>
+        <DockNavItem
+          $active={activeTab === 'alerts'}
+          onClick={() => setActiveTab('alerts')}
+          title="Traffic Alerts"
+          data-testid="dock-nav-alerts"
+        >
+          ⚠️
+        </DockNavItem>
+        <DockNavItem
+          $active={activeTab === 'settings'}
+          onClick={() => setActiveTab('settings')}
+          title="Settings"
+          data-testid="dock-nav-settings"
+        >
+          ⚙️
+        </DockNavItem>
+      </FloatingDockNav>
     </PageContainer>
   );
 }

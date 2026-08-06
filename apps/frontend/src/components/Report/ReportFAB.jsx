@@ -5,33 +5,32 @@ import styled from 'styled-components';
 
 const FabButton = styled.button`
   position: fixed;
-  bottom: 80px;
-  right: ${({ theme }) => theme.spacing.md};
-  z-index: 40;
+  bottom: 84px;
+  right: ${({ theme }) => theme.spacing.containerMargin || '16px'};
+  z-index: ${({ theme }) => theme.zIndex?.floatingControls || 40};
   background-color: ${({ theme }) => theme.colors.matatuYellow};
   color: ${({ theme }) => theme.colors.inkBlack};
-  border: ${({ theme }) => theme.borders.card};
-  padding: ${({ theme }) => theme.spacing.sm} ${({ theme }) => theme.spacing.md};
+  border: none;
+  border-radius: 9999px;
+  padding: 10px 18px;
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.xs};
-  font-family: ${({ theme }) => theme.typography.fonts.display};
-  font-size: 18px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  gap: 6px;
+  font-family: ${({ theme }) => theme.typography.fonts.body};
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: ${({ theme }) => theme.shadows.priority};
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 
   &:active {
-    transform: scale(0.95);
-    background-color: ${({ theme }) => theme.colors.inkBlack};
-    color: ${({ theme }) => theme.colors.matatuYellow};
+    transform: scale(0.92);
   }
 `;
 
 export default function ReportFAB({ onClick }) {
   return (
-    <FabButton onClick={onClick}>
+    <FabButton onClick={onClick} data-testid="report-fab">
       <span>📢</span>
       <span>REPORT</span>
     </FabButton>

@@ -1,36 +1,48 @@
 import styled from 'styled-components';
 
 export const CardContainer = styled.div`
-  background-color: ${({ theme }) => theme.colors.surface};
-  border: ${({ theme }) => theme.borders.card};
-  border-left: ${({ theme }) => theme.spacing.liveryStripe} solid
-    ${({ $color, $warning, theme }) =>
-      $warning ? theme.colors.matatuYellow : $color || theme.colors.inkBlack};
-  padding: ${({ theme }) => theme.spacing.md};
+  background-color: ${({ theme }) =>
+    theme.mode === 'dark' ? theme.colors.surface : theme.colors.surfaceContainerLowest};
+  border: 1px solid ${({ theme }) => theme.colors.outlineVariant};
+  border-radius: 24px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.md};
+  gap: 12px;
+  box-shadow: ${({ theme }) => theme.shadows.ambient};
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: ${({ theme }) => theme.shadows.priority};
+  }
 `;
 
 export const HeaderRow = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
 `;
 
 export const RouteInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.md};
+  gap: 14px;
 `;
 
 export const RouteBox = styled.div`
-  background-color: ${({ $color }) => $color || '#14140F'};
-  color: #ffffff;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background-color: ${({ $color, theme }) => $color || theme.colors.matatuYellow};
+  color: ${({ theme }) => theme.colors.inkBlack};
   font-family: ${({ theme }) => theme.typography.fonts.display};
-  font-size: 24px;
-  padding: 6px 12px;
-  border: 1px solid ${({ theme }) => theme.colors.inkBlack};
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  flex-shrink: 0;
 `;
 
 export const SaccoInfo = styled.div`
@@ -40,69 +52,75 @@ export const SaccoInfo = styled.div`
 
 export const RouteName = styled.h3`
   font-family: ${({ theme }) => theme.typography.fonts.body};
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
-  margin: 0;
+  color: ${({ theme }) => theme.colors.onSurface};
+  margin: 0 0 2px 0;
 `;
 
 export const SaccoName = styled.span`
-  font-family: ${({ theme }) => theme.typography.fonts.mono};
-  font-size: 12px;
+  font-family: ${({ theme }) => theme.typography.fonts.body};
+  font-size: 13px;
   color: ${({ theme }) => theme.colors.onSurfaceVariant};
 `;
 
 export const FareEtaBlock = styled.div`
   display: flex;
-  gap: ${({ theme }) => theme.spacing.md};
-  border-top: ${({ theme }) => theme.borders.divider};
-  border-bottom: ${({ theme }) => theme.borders.divider};
-  padding: ${({ theme }) => theme.spacing.sm} 0;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-top: 1px solid ${({ theme }) => theme.colors.outlineVariant};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.outlineVariant};
 `;
 
 export const StatItem = styled.div`
-  flex: 1;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 8px;
 `;
 
 export const StatValue = styled.span`
-  font-family: ${({ theme }) => theme.typography.fonts.mono};
-  font-size: 16px;
-  font-weight: 600;
+  font-family: ${({ theme }) => theme.typography.fonts.body};
+  font-size: 15px;
+  font-weight: 700;
   color: ${({ theme }) => theme.colors.onSurface};
 `;
 
 export const StatLabel = styled.span`
+  background-color: ${({ theme }) => theme.colors.surfaceContainerHigh};
+  color: ${({ theme }) => theme.colors.onSurface};
   font-family: ${({ theme }) => theme.typography.fonts.body};
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.onSurfaceVariant};
+  padding: 4px 10px;
+  border-radius: 9999px;
+  border: 1px solid ${({ theme }) => theme.colors.outlineVariant};
 `;
 
 export const WarningCallout = styled.div`
-  background-color: ${({ theme }) => theme.colors.surfaceVariant};
-  border: 2px solid ${({ theme }) => theme.colors.matatuYellow};
-  padding: ${({ theme }) => theme.spacing.md};
+  background-color: ${({ theme }) =>
+    theme.mode === 'dark' ? 'rgba(232, 114, 44, 0.15)' : '#fff8ed'};
+  border: 1px solid ${({ theme }) => theme.colors.alertOrange};
+  border-radius: 16px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: ${({ theme }) => theme.spacing.xs};
+  gap: 4px;
 `;
 
 export const WarningTitle = styled.div`
-  font-family: ${({ theme }) => theme.typography.fonts.display};
-  font-size: 18px;
-  color: ${({ theme }) => theme.colors.inkBlack};
-  text-transform: uppercase;
+  font-family: ${({ theme }) => theme.typography.fonts.body};
+  font-weight: 700;
+  font-size: 14px;
+  color: ${({ theme }) => theme.colors.alertOrange};
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.xs};
+  gap: 6px;
 `;
 
 export const WarningBody = styled.p`
   font-family: ${({ theme }) => theme.typography.fonts.body};
-  font-size: 14px;
+  font-size: 13px;
   color: ${({ theme }) => theme.colors.onSurface};
   margin: 0;
 `;
@@ -111,16 +129,22 @@ export const HighlightButton = styled.button`
   align-self: flex-end;
   background-color: ${({ theme }) => theme.colors.matatuYellow};
   color: ${({ theme }) => theme.colors.inkBlack};
-  font-family: ${({ theme }) => theme.typography.fonts.mono};
-  font-size: 12px;
+  font-family: ${({ theme }) => theme.typography.fonts.body};
+  font-size: 13px;
   font-weight: 700;
-  padding: 6px 12px;
-  border: ${({ theme }) => theme.borders.card};
+  padding: 8px 18px;
+  border-radius: 9999px;
+  border: none;
   cursor: pointer;
-  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.15s ease, background-color 0.15s ease;
 
   &:hover {
     background-color: ${({ theme }) => theme.colors.inkBlack};
     color: ${({ theme }) => theme.colors.matatuYellow};
+  }
+
+  &:active {
+    transform: scale(0.95);
   }
 `;
