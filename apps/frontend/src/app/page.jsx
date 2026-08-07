@@ -12,6 +12,7 @@ import ReportModal from '@/components/Report/ReportModal';
 import AllRoutesView from '@/components/RouteList/AllRoutesView';
 import LiveNowView from '@/components/RouteList/LiveNowView';
 import SavedRoutesView from '@/components/RouteList/SavedRoutesView';
+import ThikaRoadView from '@/components/RouteList/ThikaRoadView';
 
 const PageContainer = styled.main`
   position: relative;
@@ -411,6 +412,15 @@ export default function Home() {
 
         {activeFilter === 'Saved' && (
           <SavedRoutesView
+            routes={routes}
+            selectedRoute={selectedRoute}
+            onSelectRoute={handleSelectRoute}
+            onToggleSaveRoute={handleToggleSaveRoute}
+          />
+        )}
+
+        {activeFilter === 'Thika Rd' && (
+          <ThikaRoadView
             routes={routes}
             selectedRoute={selectedRoute}
             onSelectRoute={handleSelectRoute}
