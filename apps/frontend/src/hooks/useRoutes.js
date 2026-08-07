@@ -1,29 +1,55 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getRoutes } from '@/api/routes';
+import { mockRoutes } from '@/mock/mockData';
 
 export function useRoutes() {
-  const [routes, setRoutes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [routes, setRoutes] = useState(mockRoutes);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const fetchRoutes = useCallback(async () => {
-    setLoading(true);
     setError(null);
     try {
       const data = await getRoutes();
-      setRoutes(data.routes || []);
+      if (data && data.routes && data.routes.length > 0) {
+        setRoutes(data.routes);
+      } else {
+        setRoutes(mockRoutes);
+      }
     } catch (err) {
-      setError(err);
+      console.warn('Backend offline - using mockRoutes:', err?.message);
+      setRoutes(mockRoutes);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchRoutes();
-  }, [fetchRoutes]);
+    let isMounted = true;
+    getRoutes()
+      .then((data) => {
+        if (isMounted) {
+          if (data && data.routes && data.routes.length > 0) {
+            setRoutes(data.routes);
+          } else {
+            setRoutes(mockRoutes);
+          }
+        }
+      })
+      .catch((err) => {
+        if (isMounted) {
+          console.warn('Backend offline - using mockRoutes:', err?.message);
+          setRoutes(mockRoutes);
+        }
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
-  return { routes, loading, error, refetch: fetchRoutes };
+  return { routes, loading, error, refetch: fetchRoutes, setRoutes };
 }
 
 export default useRoutes;
+
+
