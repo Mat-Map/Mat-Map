@@ -15,6 +15,7 @@ import SavedRoutesView from '@/components/RouteList/SavedRoutesView';
 import ThikaRoadView from '@/components/RouteList/ThikaRoadView';
 import AlertsView from '@/components/Alerts/AlertsView';
 import { NotificationBadge } from '@/components/Alerts/AlertsView.styles';
+import SettingsView from '@/components/Settings/SettingsView';
 
 const PageContainer = styled.main`
   position: relative;
@@ -382,6 +383,11 @@ export default function Home() {
     setIsSheetExpanded(true);
   };
 
+  const handleSettingsIconClick = () => {
+    setActiveTab('settings');
+    setIsSheetExpanded(true);
+  };
+
   return (
     <PageContainer>
       <MapBackgroundWrapper>
@@ -421,11 +427,15 @@ export default function Home() {
             <SheetTitle>
               {activeTab === 'alerts'
                 ? 'Traffic & Route Alerts'
+                : activeTab === 'settings'
+                ? 'Settings & Preferences'
                 : `${filteredRoutes.length} ${filteredRoutes.length === 1 ? 'Route' : 'Routes'} Found`}
             </SheetTitle>
             <SheetSubtitle>
               {activeTab === 'alerts'
                 ? 'Real-time transit warnings & crowd spikes reported by riders'
+                : activeTab === 'settings'
+                ? 'Configure theme, telemetry mode, and app preferences'
                 : destination
                 ? `Results matching "${destination}" (${vibeFilter.toUpperCase()} vibe)`
                 : 'Swipe up to view details and live status'}
@@ -435,6 +445,8 @@ export default function Home() {
 
         {activeTab === 'alerts' ? (
           <AlertsView />
+        ) : activeTab === 'settings' ? (
+          <SettingsView />
         ) : (
           <>
             <FilterChipsRow>
@@ -525,7 +537,7 @@ export default function Home() {
         </DockNavItem>
         <DockNavItem
           $active={activeTab === 'settings'}
-          onClick={() => setActiveTab('settings')}
+          onClick={handleSettingsIconClick}
           title="Settings"
           data-testid="dock-nav-settings"
         >
