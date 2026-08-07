@@ -368,6 +368,12 @@ export default function Home() {
     return matchesVibe && matchesQuery;
   });
 
+  const handleSavedIconClick = () => {
+    setActiveTab('saved');
+    setActiveFilter('Saved');
+    setIsSheetExpanded(true);
+  };
+
   return (
     <PageContainer>
       <MapBackgroundWrapper>
@@ -484,7 +490,7 @@ export default function Home() {
         </DockNavItem>
         <DockNavItem
           $active={activeTab === 'saved'}
-          onClick={() => setActiveTab('saved')}
+          onClick={handleSavedIconClick}
           title="Saved Routes"
           data-testid="dock-nav-saved"
         >
