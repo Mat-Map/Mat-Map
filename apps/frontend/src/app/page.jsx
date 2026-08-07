@@ -337,14 +337,43 @@ export default function Home() {
 
   const handleSearchSubmit = (searchParams) => {
     setIsSheetExpanded(true);
+    setActiveFilter('All routes');
   };
+
+  const handleSearchIconClick = () => {
+    setActiveTab('nearby');
+    setActiveFilter('All routes');
+    setIsSheetExpanded(true);
+    if (typeof document !== 'undefined') {
+      const destInput = document.querySelector('[data-testid="search-destination-input"]');
+      if (destInput) destInput.focus();
+    }
+  };
+
+  // Dynamic filter for search input & vibe toggle
+  const searchLower = destination.trim().toLowerCase();
+  const filteredRoutes = routes.filter((route) => {
+    // Vibe filter check
+    const matchesVibe = !vibeFilter || route.vibeTag === vibeFilter;
+
+    // Substring match on destination, route name, sacco, or corridor
+    const matchesQuery =
+      !searchLower ||
+      route.name?.toLowerCase().includes(searchLower) ||
+      route.destinationStage?.toLowerCase().includes(searchLower) ||
+      route.originStage?.toLowerCase().includes(searchLower) ||
+      route.sacco?.toLowerCase().includes(searchLower) ||
+      route.corridor?.toLowerCase().includes(searchLower);
+
+    return matchesVibe && matchesQuery;
+  });
 
   return (
     <PageContainer>
       <MapBackgroundWrapper>
         <MapView
           stages={stages}
-          routes={routes}
+          routes={filteredRoutes}
           selectedRouteId={selectedRoute?.id}
           selectedStageId={selectedStage?.id}
           onSelectRoute={handleSelectRoute}
@@ -375,8 +404,14 @@ export default function Home() {
         <GrabberHandle onClick={() => setIsSheetExpanded((prev) => !prev)} />
         <SheetHeader>
           <div>
-            <SheetTitle>{routes.length || 3} Routes Nearby</SheetTitle>
-            <SheetSubtitle>Swipe up to view details and live status</SheetSubtitle>
+            <SheetTitle>
+              {filteredRoutes.length} {filteredRoutes.length === 1 ? 'Route' : 'Routes'} Found
+            </SheetTitle>
+            <SheetSubtitle>
+              {destination
+                ? `Results matching "${destination}" (${vibeFilter.toUpperCase()} vibe)`
+                : 'Swipe up to view details and live status'}
+            </SheetSubtitle>
           </div>
         </SheetHeader>
 
@@ -394,7 +429,7 @@ export default function Home() {
 
         {activeFilter === 'All routes' && (
           <AllRoutesView
-            routes={routes}
+            routes={filteredRoutes}
             selectedRoute={selectedRoute}
             onSelectRoute={handleSelectRoute}
             onToggleSaveRoute={handleToggleSaveRoute}
@@ -403,7 +438,7 @@ export default function Home() {
 
         {activeFilter === 'Live now' && (
           <LiveNowView
-            routes={routes}
+            routes={filteredRoutes}
             selectedRoute={selectedRoute}
             onSelectRoute={handleSelectRoute}
             onToggleSaveRoute={handleToggleSaveRoute}
@@ -441,11 +476,8 @@ export default function Home() {
       <FloatingDockNav data-testid="bottom-icon-dock">
         <DockNavItem
           $active={activeTab === 'nearby'}
-          onClick={() => {
-            setActiveTab('nearby');
-            setIsSheetExpanded((prev) => !prev);
-          }}
-          title="Nearby Routes"
+          onClick={handleSearchIconClick}
+          title="Search & Nearby Routes"
           data-testid="dock-nav-nearby"
         >
           🔍
