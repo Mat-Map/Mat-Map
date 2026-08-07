@@ -9,6 +9,7 @@ import MapView from '@/components/Map/MapView';
 import JourneyForm from '@/components/JourneyForm';
 import ReportFAB from '@/components/Report/ReportFAB';
 import ReportModal from '@/components/Report/ReportModal';
+import AllRoutesView from '@/components/RouteList/AllRoutesView';
 
 const PageContainer = styled.main`
   position: relative;
@@ -300,7 +301,7 @@ const DockNavItem = styled.button`
 export default function Home() {
   const { themeMode, toggleTheme } = useThemeToggle();
   const { stages } = useStages();
-  const { routes } = useRoutes();
+  const { routes, setRoutes } = useRoutes();
 
   const [origin, setOrigin] = useState('Nairobi CBD');
   const [destination, setDestination] = useState('');
@@ -319,6 +320,16 @@ export default function Home() {
 
   const handleSelectStage = (stage) => {
     setSelectedStage((prev) => (prev?.id === stage?.id ? null : stage));
+  };
+
+  const handleToggleSaveRoute = (routeId) => {
+    if (setRoutes) {
+      setRoutes((prevRoutes) =>
+        prevRoutes.map((r) =>
+          r.id === routeId ? { ...r, isSaved: !r.isSaved } : r
+        )
+      );
+    }
   };
 
   const handleSearchSubmit = (searchParams) => {
@@ -378,35 +389,14 @@ export default function Home() {
           ))}
         </FilterChipsRow>
 
-        <RouteCardsScrollList>
-          {routes.map((route, idx) => (
-            <CardRow
-              key={route.id || idx}
-              $selected={selectedRoute?.id === route.id}
-              onClick={() => handleSelectRoute(route)}
-              data-testid={`route-card-${route.id || idx}`}
-            >
-              <CardLeft>
-                <RouteAvatarBadge $color={route.color}>
-                  {route.name?.split(' ')[1] || route.name?.slice(0, 3) || '237'}
-                </RouteAvatarBadge>
-                <RouteMeta>
-                  <RouteTitle>{route.name}</RouteTitle>
-                  <SaccoText>🚌 {route.sacco || 'Corridor Matatu'}</SaccoText>
-                </RouteMeta>
-              </CardLeft>
-
-              <CardRight>
-                <EtaBadge>{(idx + 1) * 4} min</EtaBadge>
-                <CrowdIndicatorRow>
-                  <CrowdDot $color="#7DA82E" />
-                  <CrowdDot $color="#E8722C" />
-                  <CrowdDot $color="#BA1A1A" />
-                </CrowdIndicatorRow>
-              </CardRight>
-            </CardRow>
-          ))}
-        </RouteCardsScrollList>
+        {activeFilter === 'All routes' && (
+          <AllRoutesView
+            routes={routes}
+            selectedRoute={selectedRoute}
+            onSelectRoute={handleSelectRoute}
+            onToggleSaveRoute={handleToggleSaveRoute}
+          />
+        )}
       </BottomSheetContainer>
 
       <ReportFAB onClick={() => setIsReportOpen(true)} />
