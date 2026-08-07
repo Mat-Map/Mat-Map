@@ -13,6 +13,8 @@ import AllRoutesView from '@/components/RouteList/AllRoutesView';
 import LiveNowView from '@/components/RouteList/LiveNowView';
 import SavedRoutesView from '@/components/RouteList/SavedRoutesView';
 import ThikaRoadView from '@/components/RouteList/ThikaRoadView';
+import AlertsView from '@/components/Alerts/AlertsView';
+import { NotificationBadge } from '@/components/Alerts/AlertsView.styles';
 
 const PageContainer = styled.main`
   position: relative;
@@ -281,6 +283,7 @@ const FloatingDockNav = styled.nav`
 `;
 
 const DockNavItem = styled.button`
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -374,6 +377,11 @@ export default function Home() {
     setIsSheetExpanded(true);
   };
 
+  const handleAlertsIconClick = () => {
+    setActiveTab('alerts');
+    setIsSheetExpanded(true);
+  };
+
   return (
     <PageContainer>
       <MapBackgroundWrapper>
@@ -411,62 +419,72 @@ export default function Home() {
         <SheetHeader>
           <div>
             <SheetTitle>
-              {filteredRoutes.length} {filteredRoutes.length === 1 ? 'Route' : 'Routes'} Found
+              {activeTab === 'alerts'
+                ? 'Traffic & Route Alerts'
+                : `${filteredRoutes.length} ${filteredRoutes.length === 1 ? 'Route' : 'Routes'} Found`}
             </SheetTitle>
             <SheetSubtitle>
-              {destination
+              {activeTab === 'alerts'
+                ? 'Real-time transit warnings & crowd spikes reported by riders'
+                : destination
                 ? `Results matching "${destination}" (${vibeFilter.toUpperCase()} vibe)`
                 : 'Swipe up to view details and live status'}
             </SheetSubtitle>
           </div>
         </SheetHeader>
 
-        <FilterChipsRow>
-          {['All routes', 'Live now', 'Saved', 'Thika Rd'].map((chip) => (
-            <FilterChip
-              key={chip}
-              $active={activeFilter === chip}
-              onClick={() => setActiveFilter(chip)}
-            >
-              {chip}
-            </FilterChip>
-          ))}
-        </FilterChipsRow>
+        {activeTab === 'alerts' ? (
+          <AlertsView />
+        ) : (
+          <>
+            <FilterChipsRow>
+              {['All routes', 'Live now', 'Saved', 'Thika Rd'].map((chip) => (
+                <FilterChip
+                  key={chip}
+                  $active={activeFilter === chip}
+                  onClick={() => setActiveFilter(chip)}
+                >
+                  {chip}
+                </FilterChip>
+              ))}
+            </FilterChipsRow>
 
-        {activeFilter === 'All routes' && (
-          <AllRoutesView
-            routes={filteredRoutes}
-            selectedRoute={selectedRoute}
-            onSelectRoute={handleSelectRoute}
-            onToggleSaveRoute={handleToggleSaveRoute}
-          />
-        )}
+            {activeFilter === 'All routes' && (
+              <AllRoutesView
+                routes={filteredRoutes}
+                selectedRoute={selectedRoute}
+                onSelectRoute={handleSelectRoute}
+                onToggleSaveRoute={handleToggleSaveRoute}
+              />
+            )}
 
-        {activeFilter === 'Live now' && (
-          <LiveNowView
-            routes={filteredRoutes}
-            selectedRoute={selectedRoute}
-            onSelectRoute={handleSelectRoute}
-            onToggleSaveRoute={handleToggleSaveRoute}
-          />
-        )}
+            {activeFilter === 'Live now' && (
+              <LiveNowView
+                routes={filteredRoutes}
+                selectedRoute={selectedRoute}
+                onSelectRoute={handleSelectRoute}
+                onToggleSaveRoute={handleToggleSaveRoute}
+              />
+            )}
 
-        {activeFilter === 'Saved' && (
-          <SavedRoutesView
-            routes={routes}
-            selectedRoute={selectedRoute}
-            onSelectRoute={handleSelectRoute}
-            onToggleSaveRoute={handleToggleSaveRoute}
-          />
-        )}
+            {activeFilter === 'Saved' && (
+              <SavedRoutesView
+                routes={routes}
+                selectedRoute={selectedRoute}
+                onSelectRoute={handleSelectRoute}
+                onToggleSaveRoute={handleToggleSaveRoute}
+              />
+            )}
 
-        {activeFilter === 'Thika Rd' && (
-          <ThikaRoadView
-            routes={routes}
-            selectedRoute={selectedRoute}
-            onSelectRoute={handleSelectRoute}
-            onToggleSaveRoute={handleToggleSaveRoute}
-          />
+            {activeFilter === 'Thika Rd' && (
+              <ThikaRoadView
+                routes={routes}
+                selectedRoute={selectedRoute}
+                onSelectRoute={handleSelectRoute}
+                onToggleSaveRoute={handleToggleSaveRoute}
+              />
+            )}
+          </>
         )}
       </BottomSheetContainer>
 
@@ -498,10 +516,11 @@ export default function Home() {
         </DockNavItem>
         <DockNavItem
           $active={activeTab === 'alerts'}
-          onClick={() => setActiveTab('alerts')}
+          onClick={handleAlertsIconClick}
           title="Traffic Alerts"
           data-testid="dock-nav-alerts"
         >
+          <NotificationBadge data-testid="alerts-unread-badge" />
           ⚠️
         </DockNavItem>
         <DockNavItem
