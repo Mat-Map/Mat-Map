@@ -13,6 +13,8 @@ import {
   TagsGroup,
   FareTag,
   VibeBadge,
+  LiveBadge,
+  LivePulseDot,
   CrowdGroup,
   CrowdDot,
   SaveButton,
@@ -23,6 +25,9 @@ export default function RouteCard({
   isSelected,
   onSelect,
   onToggleSave,
+  isLive = false,
+  liveVehicle = null,
+  liveEtaDisplay = null,
 }) {
   if (!route) return null;
 
@@ -48,13 +53,15 @@ export default function RouteCard({
           <RouteMeta>
             <RouteTitle>{route.name}</RouteTitle>
             <RouteSubtitle>
-              🚌 {route.sacco || 'Express Matatu'}
+              🚌 {liveVehicle?.registration ? `${liveVehicle.registration} (${liveVehicle.name})` : route.sacco || 'Express Matatu'}
             </RouteSubtitle>
           </RouteMeta>
         </CardLeft>
 
         <CardRight>
-          <EtaBadge>{route.etaMinutes || 10} min</EtaBadge>
+          <EtaBadge style={isLive ? { border: '1px solid #7DA82E', color: '#7DA82E' } : {}}>
+            {liveEtaDisplay || `${route.etaMinutes || 10} min`}
+          </EtaBadge>
           <SaveButton
             $isSaved={route.isSaved}
             onClick={handleSaveClick}
@@ -68,6 +75,11 @@ export default function RouteCard({
 
       <CardFooterRow>
         <TagsGroup>
+          {isLive && (
+            <LiveBadge data-testid="live-now-badge">
+              <LivePulseDot /> LIVE NOW
+            </LiveBadge>
+          )}
           <FareTag>{route.fareRange || 'KES 50 - 100'}</FareTag>
           <VibeBadge $vibe={route.vibeTag || 'nganya'}>
             {route.vibeTag === 'nganya' ? '🔥 Nganya' : '🎧 Quiet'}
@@ -83,3 +95,4 @@ export default function RouteCard({
     </CardWrapper>
   );
 }
+

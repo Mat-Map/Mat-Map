@@ -10,6 +10,7 @@ import JourneyForm from '@/components/JourneyForm';
 import ReportFAB from '@/components/Report/ReportFAB';
 import ReportModal from '@/components/Report/ReportModal';
 import AllRoutesView from '@/components/RouteList/AllRoutesView';
+import LiveNowView from '@/components/RouteList/LiveNowView';
 
 const PageContainer = styled.main`
   position: relative;
@@ -391,6 +392,15 @@ export default function Home() {
 
         {activeFilter === 'All routes' && (
           <AllRoutesView
+            routes={routes}
+            selectedRoute={selectedRoute}
+            onSelectRoute={handleSelectRoute}
+            onToggleSaveRoute={handleToggleSaveRoute}
+          />
+        )}
+
+        {activeFilter === 'Live now' && (
+          <LiveNowView
             routes={routes}
             selectedRoute={selectedRoute}
             onSelectRoute={handleSelectRoute}

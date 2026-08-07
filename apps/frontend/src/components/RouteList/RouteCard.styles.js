@@ -129,6 +129,31 @@ export const FareTag = styled.span`
   border: 1px solid ${({ theme }) => theme.colors.outlineVariant};
 `;
 
+export const LivePulseDot = styled.div`
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #7DA82E;
+  box-shadow: 0 0 6px #7DA82E;
+  animation: ${pulse} 1s infinite ease-in-out;
+`;
+
+export const LiveBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: ${({ theme }) => theme.typography.fonts.body};
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.colors.inkBlack};
+  background-color: ${({ theme }) => theme.colors.matatuYellow};
+  padding: 3px 9px;
+  border-radius: 9999px;
+  box-shadow: 0 2px 6px rgba(242, 183, 5, 0.3);
+`;
+
 export const VibeBadge = styled.span`
   font-family: ${({ theme }) => theme.typography.fonts.body};
   font-size: 10px;
