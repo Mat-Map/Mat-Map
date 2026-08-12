@@ -9,7 +9,9 @@ export const mockStages = [
   { id: 'stage-muthaiga', name: 'Muthaiga Interchange', lat: -1.2520, lng: 36.8450 },
   { id: 'stage-thika-rd', name: 'Roysambu Roundabout', lat: -1.2185, lng: 36.8878 },
   { id: 'stage-kasarani', name: 'Kasarani Stadium', lat: -1.2220, lng: 36.8970 },
+  { id: 'stage-githurai', name: 'Githurai 44 Stage', lat: -1.1970, lng: 36.9430 },
   { id: 'stage-kahawa', name: 'Kahawa Sukari', lat: -1.1850, lng: 36.9320 },
+  { id: 'stage-ruiru', name: 'Ruiru Town Stage', lat: -1.1500, lng: 36.9660 },
   { id: 'stage-juja', name: 'Juja Main Stage', lat: -1.1018, lng: 37.0144 },
   { id: 'stage-thika-town', name: 'Thika Town Main Stage', lat: -1.0396, lng: 37.0700 },
   { id: 'stage-kiamambu', name: 'Kiambu Town', lat: -1.1714, lng: 36.8356 },
@@ -29,10 +31,29 @@ export const mockRoutes = [
     etaMinutes: 12,
     vibeTag: 'nganya', // 'nganya' or 'quiet'
     isSaved: true,
-    stages: ['stage-cbd', 'stage-ngara', 'stage-pangani', 'stage-thika-rd', 'stage-juja', 'stage-thika-town'],
+    stages: ['stage-cbd', 'stage-ngara', 'stage-pangani', 'stage-thika-rd', 'stage-kasarani', 'stage-kahawa', 'stage-ruiru', 'stage-juja', 'stage-thika-town'],
     crowdLevelPerStage: {
       'stage-cbd': 'high',
       'stage-ngara': 'medium',
+      'stage-thika-rd': 'low',
+    },
+  },
+  {
+    id: 'route-237q',
+    name: '237B - Thika Quiet',
+    sacco: 'Nicco Bus Sacco',
+    color: '#1B8A8A', // Teal accent, distinct from nganya orange
+    originStage: 'Nairobi CBD (Archives)',
+    destinationStage: 'Thika Town Main Stage',
+    corridor: 'Thika Road',
+    fareRange: 'KES 80 - 100',
+    etaMinutes: 16,
+    vibeTag: 'quiet',
+    isSaved: false,
+    stages: ['stage-cbd', 'stage-ngara', 'stage-pangani', 'stage-thika-rd', 'stage-kasarani', 'stage-kahawa', 'stage-ruiru', 'stage-juja', 'stage-thika-town'],
+    crowdLevelPerStage: {
+      'stage-cbd': 'medium',
+      'stage-ngara': 'low',
       'stage-thika-rd': 'low',
     },
   },
@@ -48,9 +69,27 @@ export const mockRoutes = [
     etaMinutes: 8,
     vibeTag: 'nganya',
     isSaved: true,
-    stages: ['stage-cbd', 'stage-ngara', 'stage-pangani', 'stage-thika-rd', 'stage-kahawa'],
+    stages: ['stage-cbd', 'stage-ngara', 'stage-pangani', 'stage-thika-rd', 'stage-kasarani', 'stage-githurai', 'stage-kahawa'],
     crowdLevelPerStage: {
       'stage-cbd': 'medium',
+      'stage-ngara': 'low',
+    },
+  },
+  {
+    id: 'route-44q',
+    name: '44B - Kahawa Quiet',
+    sacco: 'Nawasuku Express',
+    color: '#0EA5E9', // Sky blue, distinct from nganya blue
+    originStage: 'Nairobi CBD (Archives)',
+    destinationStage: 'Kahawa Sukari',
+    corridor: 'Thika Road',
+    fareRange: 'KES 50 - 80',
+    etaMinutes: 11,
+    vibeTag: 'quiet',
+    isSaved: false,
+    stages: ['stage-cbd', 'stage-ngara', 'stage-pangani', 'stage-thika-rd', 'stage-kasarani', 'stage-githurai', 'stage-kahawa'],
+    crowdLevelPerStage: {
+      'stage-cbd': 'low',
       'stage-ngara': 'low',
     },
   },
@@ -106,6 +145,42 @@ export const mockRoutes = [
       'stage-kasarani': 'medium',
     },
   },
+  {
+    id: 'route-45q',
+    name: '45B - Kasarani Quiet',
+    sacco: 'Nakaski Transport SACCO',
+    color: '#F59E0B',
+    originStage: 'Nairobi CBD (Archives)',
+    destinationStage: 'Kasarani Stadium',
+    corridor: 'Thika Road',
+    fareRange: 'KES 50 - 70',
+    etaMinutes: 9,
+    vibeTag: 'quiet',
+    isSaved: false,
+    stages: ['stage-cbd', 'stage-ngara', 'stage-thika-rd', 'stage-kasarani'],
+    crowdLevelPerStage: {
+      'stage-cbd': 'low',
+      'stage-kasarani': 'low',
+    },
+  },
+  {
+    id: 'route-237r',
+    name: '237C - Ruiru Quiet',
+    sacco: 'Kenya Mpya Bus Services',
+    color: '#6366F1',
+    originStage: 'Nairobi CBD (Archives)',
+    destinationStage: 'Ruiru Town Stage',
+    corridor: 'Thika Road',
+    fareRange: 'KES 60 - 90',
+    etaMinutes: 14,
+    vibeTag: 'quiet',
+    isSaved: false,
+    stages: ['stage-cbd', 'stage-ngara', 'stage-pangani', 'stage-thika-rd', 'stage-kasarani', 'stage-githurai', 'stage-kahawa', 'stage-ruiru'],
+    crowdLevelPerStage: {
+      'stage-cbd': 'low',
+      'stage-ngara': 'low',
+    },
+  },
 ];
 
 export const mockLiveVehicles = [
@@ -144,6 +219,42 @@ export const mockLiveVehicles = [
     liveEtaSeconds: 300, // 5 mins
     crowdLevel: 'high',
     vibe: 'nganya',
+  },
+  {
+    id: 'veh-04',
+    routeId: 'route-237q',
+    registration: 'KDF 234A',
+    sacco: 'Nicco Bus Sacco',
+    name: 'Nicco Comfort',
+    currentStage: 'Muthaiga',
+    nextStage: 'Roysambu',
+    liveEtaSeconds: 360, // 6 mins
+    crowdLevel: 'low',
+    vibe: 'quiet',
+  },
+  {
+    id: 'veh-05',
+    routeId: 'route-44q',
+    registration: 'KDG 567B',
+    sacco: 'Nawasuku Express',
+    name: 'Nawasuku Serene',
+    currentStage: 'Kasarani',
+    nextStage: 'Githurai',
+    liveEtaSeconds: 210, // 3.5 mins
+    crowdLevel: 'low',
+    vibe: 'quiet',
+  },
+  {
+    id: 'veh-06',
+    routeId: 'route-45q',
+    registration: 'KDH 890C',
+    sacco: 'Nakaski Transport SACCO',
+    name: 'Nakaski Steady',
+    currentStage: 'Roysambu',
+    nextStage: 'Kasarani',
+    liveEtaSeconds: 150, // 2.5 mins
+    crowdLevel: 'low',
+    vibe: 'quiet',
   },
 ];
 
@@ -186,6 +297,8 @@ export const mockSupportedStages = [
   'Kasarani',
   'Ruiru',
   'Kahawa Sukari',
+  'Githurai',
+  'Thika Town',
 ];
 
 export const mockOperators = [
@@ -218,7 +331,7 @@ export const mockOperators = [
     name: 'Nicco Movers',
     sacco: 'Nicco Bus Sacco',
     vibeTag: 'quiet',
-    stagesServed: ['Ruiru', 'Juja'],
+    stagesServed: ['Ruiru', 'Juja', 'Thika Town'],
     fareRange: 'KES 80 - 100',
     frequency: 'every 10–15 min',
     routeNumber: '237',
@@ -242,7 +355,7 @@ export const mockOperators = [
     name: 'Nawasuku Sacco',
     sacco: 'Nawasuku Express',
     vibeTag: 'quiet',
-    stagesServed: ['Kahawa Sukari', 'Ruiru'],
+    stagesServed: ['Kahawa Sukari', 'Ruiru', 'Githurai'],
     fareRange: 'KES 50 - 80',
     frequency: 'every 5–10 min',
     routeNumber: '45K',
@@ -284,6 +397,18 @@ export const mockOperators = [
     routeNumber: '237',
     color: '#6366F1',
     terminus: 'Commercial Area / CBD',
+  },
+  {
+    id: 'op-citihoppa',
+    name: 'City Hoppa',
+    sacco: 'City Hoppa Ltd',
+    vibeTag: 'quiet',
+    stagesServed: ['Githurai', 'Kahawa Sukari', 'Thika Town'],
+    fareRange: 'KES 60 - 100',
+    frequency: 'every 10–15 min',
+    routeNumber: '237B',
+    color: '#1B8A8A',
+    terminus: 'Ambassadeur / CBD',
   },
 ];
 
@@ -339,4 +464,3 @@ export function searchRoutes({ origin = 'Nairobi CBD', destination = '', vibe = 
     };
   });
 }
-
