@@ -180,3 +180,163 @@ export const mockAlerts = [
     timestamp: '40 min ago',
   },
 ];
+
+export const mockSupportedStages = [
+  'Juja',
+  'Kasarani',
+  'Ruiru',
+  'Kahawa Sukari',
+];
+
+export const mockOperators = [
+  {
+    id: 'op-supermetro',
+    name: 'Super Metro Sacco',
+    sacco: 'Super Metro Sacco',
+    vibeTag: 'nganya',
+    stagesServed: ['Juja', 'Kahawa Sukari', 'Ruiru'],
+    fareRange: 'KES 80 - 120',
+    frequency: 'every 5–10 min',
+    routeNumber: '237',
+    color: '#E8722C',
+    terminus: 'Nairobi CBD (Archives)',
+  },
+  {
+    id: 'op-expresso',
+    name: 'Expresso Line',
+    sacco: 'Expresso Transporters',
+    vibeTag: 'nganya',
+    stagesServed: ['Kasarani'],
+    fareRange: 'KES 50 - 80',
+    frequency: 'every 3–7 min',
+    routeNumber: '145',
+    color: '#EC4899',
+    terminus: 'Tom Mboya St / CBD',
+  },
+  {
+    id: 'op-nicco',
+    name: 'Nicco Movers',
+    sacco: 'Nicco Bus Sacco',
+    vibeTag: 'quiet',
+    stagesServed: ['Ruiru', 'Juja'],
+    fareRange: 'KES 80 - 100',
+    frequency: 'every 10–15 min',
+    routeNumber: '237',
+    color: '#3B82F6',
+    terminus: 'Khoja / CBD',
+  },
+  {
+    id: 'op-lopha',
+    name: 'Lopha Travels',
+    sacco: 'Lopha Multipurpose Co-op',
+    vibeTag: 'quiet',
+    stagesServed: ['Kasarani', 'Ruiru', 'Juja'],
+    fareRange: 'KES 70 - 100',
+    frequency: 'every 5–10 min',
+    routeNumber: '145',
+    color: '#10B981',
+    terminus: 'Latema Rd / CBD',
+  },
+  {
+    id: 'op-nawasuku',
+    name: 'Nawasuku Sacco',
+    sacco: 'Nawasuku Express',
+    vibeTag: 'quiet',
+    stagesServed: ['Kahawa Sukari', 'Ruiru'],
+    fareRange: 'KES 50 - 80',
+    frequency: 'every 5–10 min',
+    routeNumber: '45K',
+    color: '#8B5CF6',
+    terminus: 'Archives / CBD',
+  },
+  {
+    id: 'op-nakaski',
+    name: 'Nakaski SACCO',
+    sacco: 'Nakaski Transport SACCO',
+    vibeTag: 'quiet',
+    stagesServed: ['Kasarani'],
+    fareRange: 'KES 50 - 70',
+    frequency: 'every 8–12 min',
+    routeNumber: '45',
+    color: '#F59E0B',
+    terminus: 'Muthurwa / CBD',
+  },
+  {
+    id: 'op-nazigi',
+    name: 'Nazigi Express',
+    sacco: 'Nazigi Transporters',
+    vibeTag: 'quiet',
+    stagesServed: ['Kasarani', 'Kahawa Sukari'],
+    fareRange: 'KES 50 - 70',
+    frequency: 'every 10–15 min',
+    routeNumber: '44',
+    color: '#06B6D4',
+    terminus: 'Khoja Mosque / CBD',
+  },
+  {
+    id: 'op-kenyampya',
+    name: 'Kenya Mpya',
+    sacco: 'Kenya Mpya Bus Services',
+    vibeTag: 'quiet',
+    stagesServed: ['Juja', 'Ruiru'],
+    fareRange: 'KES 70 - 100',
+    frequency: 'every 5–10 min',
+    routeNumber: '237',
+    color: '#6366F1',
+    terminus: 'Commercial Area / CBD',
+  },
+];
+
+/**
+ * Pure route search function using mock operators.
+ * Implements soft-sorting by vibe (preferred vibe placed first).
+ */
+export function searchRoutes({ origin = 'Nairobi CBD', destination = '', vibe = null } = {}) {
+  const destLower = destination.trim().toLowerCase();
+  if (!destLower) return [];
+
+  // Filter operators that serve the destination stage
+  const matches = mockOperators.filter((op) =>
+    op.stagesServed.some(
+      (stage) =>
+        stage.toLowerCase() === destLower ||
+        stage.toLowerCase().includes(destLower) ||
+        destLower.includes(stage.toLowerCase())
+    )
+  );
+
+  // Soft sort: preferred vibe matching operators listed first
+  if (vibe) {
+    matches.sort((a, b) => {
+      const aMatch = a.vibeTag === vibe ? 1 : 0;
+      const bMatch = b.vibeTag === vibe ? 1 : 0;
+      return bMatch - aMatch;
+    });
+  }
+
+  return matches.map((op) => {
+    const matchedStage =
+      op.stagesServed.find(
+        (s) =>
+          s.toLowerCase() === destLower ||
+          s.toLowerCase().includes(destLower) ||
+          destLower.includes(s.toLowerCase())
+      ) || destination;
+
+    return {
+      id: `search-${op.id}-${matchedStage.toLowerCase().replace(/\s+/g, '-')}`,
+      name: `${op.routeNumber ? op.routeNumber + ' - ' : ''}${op.name}`,
+      sacco: op.sacco,
+      color: op.color,
+      originStage: origin || 'Nairobi CBD',
+      destinationStage: matchedStage,
+      corridor: 'Thika Road',
+      fareRange: op.fareRange,
+      frequency: op.frequency,
+      etaMinutes: 10,
+      vibeTag: op.vibeTag,
+      isSaved: false,
+    };
+  });
+}
+
