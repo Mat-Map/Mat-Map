@@ -52,6 +52,7 @@ export default function LiveNowView({
   selectedRoute,
   onSelectRoute,
   onToggleSaveRoute,
+  vibeFilter = 'all', // 'all' | 'nganya' | 'quiet'
 }) {
   const [loading, setLoading] = useState(true);
 
@@ -92,7 +93,7 @@ export default function LiveNowView({
     return () => clearInterval(interval);
   }, []);
 
-  // Filter routes that have an active live vehicle
+  // Build live route items, then filter by vibe (nganya/quiet/all)
   const liveRouteItems = mockLiveVehicles
     .map((vehicle) => {
       const parentRoute = routes.find((r) => r.id === vehicle.routeId) || {
@@ -109,7 +110,15 @@ export default function LiveNowView({
         route: parentRoute,
       };
     })
-    .filter((item) => Boolean(item.route));
+    .filter((item) => Boolean(item.route))
+    .filter((item) => {
+      if (vibeFilter === 'all') return true;
+      // Routes/vehicles with no vibe data yet are treated as "unknown"
+      // and stay visible under both filters instead of disappearing.
+      const vibe = item.route.vibeTag;
+      if (!vibe) return true;
+      return vibe === vibeFilter;
+    });
 
   const formatEtaDisplay = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -133,7 +142,9 @@ export default function LiveNowView({
         <span style={{ fontSize: '32px' }}>📡</span>
         <EmptyStateTitle>No Live Matatus Right Now</EmptyStateTitle>
         <EmptyStateText>
-          Check back shortly. Live tracked vehicles will appear here in real-time.
+          {vibeFilter === 'all'
+            ? 'Check back shortly. Live tracked vehicles will appear here in real-time.'
+            : `No ${vibeFilter === 'nganya' ? 'Nganya' : 'Quiet'} vibe matatus live right now. Try switching the filter.`}
         </EmptyStateText>
       </EmptyStateWrapper>
     );
