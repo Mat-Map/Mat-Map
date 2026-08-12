@@ -9,6 +9,13 @@ import MapView from '@/components/Map/MapView';
 import JourneyForm from '@/components/JourneyForm';
 import ReportFAB from '@/components/Report/ReportFAB';
 import ReportModal from '@/components/Report/ReportModal';
+import AllRoutesView from '@/components/RouteList/AllRoutesView';
+import LiveNowView from '@/components/RouteList/LiveNowView';
+import SavedRoutesView from '@/components/RouteList/SavedRoutesView';
+import ThikaRoadView from '@/components/RouteList/ThikaRoadView';
+import AlertsView from '@/components/Alerts/AlertsView';
+import { NotificationBadge } from '@/components/Alerts/AlertsView.styles';
+import SettingsView from '@/components/Settings/SettingsView';
 
 const PageContainer = styled.main`
   position: relative;
@@ -277,6 +284,7 @@ const FloatingDockNav = styled.nav`
 `;
 
 const DockNavItem = styled.button`
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -300,7 +308,7 @@ const DockNavItem = styled.button`
 export default function Home() {
   const { themeMode, toggleTheme } = useThemeToggle();
   const { stages } = useStages();
-  const { routes } = useRoutes();
+  const { routes, setRoutes } = useRoutes();
 
   const [origin, setOrigin] = useState('Nairobi CBD');
   const [destination, setDestination] = useState('');
@@ -321,7 +329,62 @@ export default function Home() {
     setSelectedStage((prev) => (prev?.id === stage?.id ? null : stage));
   };
 
+  const handleToggleSaveRoute = (routeId) => {
+    if (setRoutes) {
+      setRoutes((prevRoutes) =>
+        prevRoutes.map((r) =>
+          r.id === routeId ? { ...r, isSaved: !r.isSaved } : r
+        )
+      );
+    }
+  };
+
   const handleSearchSubmit = (searchParams) => {
+    setIsSheetExpanded(true);
+    setActiveFilter('All routes');
+  };
+
+  const handleSearchIconClick = () => {
+    setActiveTab('nearby');
+    setActiveFilter('All routes');
+    setIsSheetExpanded(true);
+    if (typeof document !== 'undefined') {
+      const destInput = document.querySelector('[data-testid="search-destination-input"]');
+      if (destInput) destInput.focus();
+    }
+  };
+
+  // Dynamic filter for search input & vibe toggle
+  const searchLower = destination.trim().toLowerCase();
+  const filteredRoutes = routes.filter((route) => {
+    // Vibe filter check
+    const matchesVibe = !vibeFilter || route.vibeTag === vibeFilter;
+
+    // Substring match on destination, route name, sacco, or corridor
+    const matchesQuery =
+      !searchLower ||
+      route.name?.toLowerCase().includes(searchLower) ||
+      route.destinationStage?.toLowerCase().includes(searchLower) ||
+      route.originStage?.toLowerCase().includes(searchLower) ||
+      route.sacco?.toLowerCase().includes(searchLower) ||
+      route.corridor?.toLowerCase().includes(searchLower);
+
+    return matchesVibe && matchesQuery;
+  });
+
+  const handleSavedIconClick = () => {
+    setActiveTab('saved');
+    setActiveFilter('Saved');
+    setIsSheetExpanded(true);
+  };
+
+  const handleAlertsIconClick = () => {
+    setActiveTab('alerts');
+    setIsSheetExpanded(true);
+  };
+
+  const handleSettingsIconClick = () => {
+    setActiveTab('settings');
     setIsSheetExpanded(true);
   };
 
@@ -330,7 +393,7 @@ export default function Home() {
       <MapBackgroundWrapper>
         <MapView
           stages={stages}
-          routes={routes}
+          routes={filteredRoutes}
           selectedRouteId={selectedRoute?.id}
           selectedStageId={selectedStage?.id}
           onSelectRoute={handleSelectRoute}
@@ -361,52 +424,80 @@ export default function Home() {
         <GrabberHandle onClick={() => setIsSheetExpanded((prev) => !prev)} />
         <SheetHeader>
           <div>
-            <SheetTitle>{routes.length || 3} Routes Nearby</SheetTitle>
-            <SheetSubtitle>Swipe up to view details and live status</SheetSubtitle>
+            <SheetTitle>
+              {activeTab === 'alerts'
+                ? 'Traffic & Route Alerts'
+                : activeTab === 'settings'
+                ? 'Settings & Preferences'
+                : `${filteredRoutes.length} ${filteredRoutes.length === 1 ? 'Route' : 'Routes'} Found`}
+            </SheetTitle>
+            <SheetSubtitle>
+              {activeTab === 'alerts'
+                ? 'Real-time transit warnings & crowd spikes reported by riders'
+                : activeTab === 'settings'
+                ? 'Configure theme, telemetry mode, and app preferences'
+                : destination
+                ? `Results matching "${destination}" (${vibeFilter.toUpperCase()} vibe)`
+                : 'Swipe up to view details and live status'}
+            </SheetSubtitle>
           </div>
         </SheetHeader>
 
-        <FilterChipsRow>
-          {['All routes', 'Live now', 'Saved', 'Thika Rd'].map((chip) => (
-            <FilterChip
-              key={chip}
-              $active={activeFilter === chip}
-              onClick={() => setActiveFilter(chip)}
-            >
-              {chip}
-            </FilterChip>
-          ))}
-        </FilterChipsRow>
+        {activeTab === 'alerts' ? (
+          <AlertsView />
+        ) : activeTab === 'settings' ? (
+          <SettingsView />
+        ) : (
+          <>
+            <FilterChipsRow>
+              {['All routes', 'Live now', 'Saved', 'Thika Rd'].map((chip) => (
+                <FilterChip
+                  key={chip}
+                  $active={activeFilter === chip}
+                  onClick={() => setActiveFilter(chip)}
+                >
+                  {chip}
+                </FilterChip>
+              ))}
+            </FilterChipsRow>
 
-        <RouteCardsScrollList>
-          {routes.map((route, idx) => (
-            <CardRow
-              key={route.id || idx}
-              $selected={selectedRoute?.id === route.id}
-              onClick={() => handleSelectRoute(route)}
-              data-testid={`route-card-${route.id || idx}`}
-            >
-              <CardLeft>
-                <RouteAvatarBadge $color={route.color}>
-                  {route.name?.split(' ')[1] || route.name?.slice(0, 3) || '237'}
-                </RouteAvatarBadge>
-                <RouteMeta>
-                  <RouteTitle>{route.name}</RouteTitle>
-                  <SaccoText>🚌 {route.sacco || 'Corridor Matatu'}</SaccoText>
-                </RouteMeta>
-              </CardLeft>
+            {activeFilter === 'All routes' && (
+              <AllRoutesView
+                routes={filteredRoutes}
+                selectedRoute={selectedRoute}
+                onSelectRoute={handleSelectRoute}
+                onToggleSaveRoute={handleToggleSaveRoute}
+              />
+            )}
 
-              <CardRight>
-                <EtaBadge>{(idx + 1) * 4} min</EtaBadge>
-                <CrowdIndicatorRow>
-                  <CrowdDot $color="#7DA82E" />
-                  <CrowdDot $color="#E8722C" />
-                  <CrowdDot $color="#BA1A1A" />
-                </CrowdIndicatorRow>
-              </CardRight>
-            </CardRow>
-          ))}
-        </RouteCardsScrollList>
+            {activeFilter === 'Live now' && (
+              <LiveNowView
+                routes={filteredRoutes}
+                selectedRoute={selectedRoute}
+                onSelectRoute={handleSelectRoute}
+                onToggleSaveRoute={handleToggleSaveRoute}
+              />
+            )}
+
+            {activeFilter === 'Saved' && (
+              <SavedRoutesView
+                routes={routes}
+                selectedRoute={selectedRoute}
+                onSelectRoute={handleSelectRoute}
+                onToggleSaveRoute={handleToggleSaveRoute}
+              />
+            )}
+
+            {activeFilter === 'Thika Rd' && (
+              <ThikaRoadView
+                routes={routes}
+                selectedRoute={selectedRoute}
+                onSelectRoute={handleSelectRoute}
+                onToggleSaveRoute={handleToggleSaveRoute}
+              />
+            )}
+          </>
+        )}
       </BottomSheetContainer>
 
       <ReportFAB onClick={() => setIsReportOpen(true)} />
@@ -421,18 +512,15 @@ export default function Home() {
       <FloatingDockNav data-testid="bottom-icon-dock">
         <DockNavItem
           $active={activeTab === 'nearby'}
-          onClick={() => {
-            setActiveTab('nearby');
-            setIsSheetExpanded((prev) => !prev);
-          }}
-          title="Nearby Routes"
+          onClick={handleSearchIconClick}
+          title="Search & Nearby Routes"
           data-testid="dock-nav-nearby"
         >
           🔍
         </DockNavItem>
         <DockNavItem
           $active={activeTab === 'saved'}
-          onClick={() => setActiveTab('saved')}
+          onClick={handleSavedIconClick}
           title="Saved Routes"
           data-testid="dock-nav-saved"
         >
@@ -440,15 +528,16 @@ export default function Home() {
         </DockNavItem>
         <DockNavItem
           $active={activeTab === 'alerts'}
-          onClick={() => setActiveTab('alerts')}
+          onClick={handleAlertsIconClick}
           title="Traffic Alerts"
           data-testid="dock-nav-alerts"
         >
+          <NotificationBadge data-testid="alerts-unread-badge" />
           ⚠️
         </DockNavItem>
         <DockNavItem
           $active={activeTab === 'settings'}
-          onClick={() => setActiveTab('settings')}
+          onClick={handleSettingsIconClick}
           title="Settings"
           data-testid="dock-nav-settings"
         >
